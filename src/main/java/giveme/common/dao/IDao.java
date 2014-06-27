@@ -22,7 +22,6 @@ public abstract class IDao<T>
 
 	public List<T> list()
 	{
-		LOGGER.info("Listing shows.");
 		this.connection = this.jdbcConnector.getConnection();
 
 		final List<T> resultList = new ArrayList<T>();

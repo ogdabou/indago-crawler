@@ -1,46 +1,12 @@
 package giveme.controllers;
 
-import giveme.common.beans.ArticleDetails;
-
 import java.util.ArrayList;
 
 public class ArticleDescriptionMapper
 {
-	private ArrayList<String> article_url;
-	private ArrayList<String> description;
-	private String imageUrl;
+	private ArrayList<String> category;
+	private ArrayList<ArticleDescriptionJson> variants;
 	private String url;
-	private ArrayList<String> title;
-
-	public ArrayList<String> getArticle_url()
-	{
-		return article_url;
-	}
-
-	public void setArticle_url(ArrayList<String> article_url)
-	{
-		this.article_url = article_url;
-	}
-
-	public ArrayList<String> getDescription()
-	{
-		return description;
-	}
-
-	public void setDescription(ArrayList<String> description)
-	{
-		this.description = description;
-	}
-
-	public String getImageUrl()
-	{
-		return imageUrl;
-	}
-
-	public void setImageUrl(String imageUrl)
-	{
-		this.imageUrl = imageUrl;
-	}
 
 	public String getUrl()
 	{
@@ -52,34 +18,23 @@ public class ArticleDescriptionMapper
 		this.url = url;
 	}
 
-	public ArrayList<String> getTitle()
+	public ArrayList<String> getCategory()
 	{
-		return title;
+		return category;
 	}
 
-	public void setTitle(ArrayList<String> title)
+	public void setCategory(ArrayList<String> category)
 	{
-		this.title = title;
+		this.category = category;
 	}
 
-	public ArticleDetails convert()
+	public ArrayList<ArticleDescriptionJson> getVariants()
 	{
-		ArticleDetails articleDetails = new ArticleDetails();
-		if (getArticle_url() != null)
-		{
-			articleDetails.setArticle_url(getArticle_url().get(0));
-		}
-		if (getDescription() != null)
-		{
-			articleDetails.setDescription(getDescription().get(0));
-		}
-		articleDetails.setImageUrl(getImageUrl());
-		if (getTitle() != null)
-		{
-			articleDetails.setTitle(getTitle().get(0));
-		}
-		articleDetails.setUrl(getUrl());
-		return articleDetails;
+		return variants;
 	}
 
+	public void setVariants(ArrayList<ArticleDescriptionJson> variants)
+	{
+		this.variants = variants;
+	}
 }

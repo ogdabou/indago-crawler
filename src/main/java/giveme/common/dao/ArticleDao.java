@@ -1,6 +1,6 @@
 package giveme.common.dao;
 
-import giveme.common.beans.Articles;
+import giveme.common.beans.Article;
 import giveme.controllers.JDBCConnector;
 
 import java.sql.Connection;
@@ -28,11 +28,11 @@ public class ArticleDao
 
 	private Connection jdbcConnection;
 
-	public List<Articles> list()
+	public List<Article> list()
 	{
 		jdbcConnection = connector.getConnection();
 
-		final List<Articles> articleList = new ArrayList<>();
+		final List<Article> articleList = new ArrayList<>();
 
 		try
 		{
@@ -41,9 +41,10 @@ public class ArticleDao
 					query);
 			while (rs.next())
 			{
-				final Articles ar = createArticleFromResultSet(rs);
+				final Article ar = createArticleFromResultSet(rs);
 				articleList.add(ar);
 			}
+			jdbcConnection.close();
 		} catch (Exception e)
 		{
 			LOGGER.error(e.getMessage());
@@ -52,52 +53,49 @@ public class ArticleDao
 		return articleList;
 	}
 
-	public void save(Articles ar)
+	public void save(Article ar)
 	{
 		jdbcConnection = connector.getConnection();
-
-		final List<Articles> articleList = new ArrayList<>();
 
 		try
 		{
 			final String query = "insert into " + TABLE_NAME
-					+ "(titre_article, contenu_article, "
+					+ " (titre_article, contenu_article, "
 					+ "couv_article, description, id_auteur, id_categorie)"
 					+ " VALUES (?, ?, ?, ?, ?, ?)";
-			final ResultSet rs = jdbcConnection.createStatement().executeQuery(
-					query);
-			while (rs.next())
+
+			final PreparedStatement statement = jdbcConnection
+					.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			statement.setString(1, "coucou");
+			statement.setString(2, ar.getContent());
+			statement.setString(3, ar.getAritcleCover());
+			statement.setString(4, ar.getDescription());
+			statement.setLong(5, ar.getAuthorId());
+			statement.setLong(6, ar.getCategoryId());
+			statement.executeUpdate();
+			ResultSet idresult = statement.getGeneratedKeys();
+			if (idresult.next() && idresult != null)
 			{
-				final PreparedStatement statement = jdbcConnection
-						.prepareStatement(query,
-								Statement.RETURN_GENERATED_KEYS);
-				statement.setString(1, ar.getTitle());
-				statement.setString(2, ar.getContent());
-				statement.setString(3, "");
-				statement.setString(4, ar.getDescription());
-				statement.setLong(5, ar.getAuthorId());
-				statement.setLong(6, ar.getCategory());
-				ResultSet idresult = statement.getGeneratedKeys();
-				if (idresult.next() && idresult != null)
-				{
-					ar.setId(idresult.getLong("id_article"));
-				}
+				ar.setId(idresult.getLong("id_article"));
 			}
+
+			jdbcConnection.close();
 		} catch (Exception e)
 		{
-			LOGGER.error(e.getMessage());
+			e.printStackTrace();
+
 		}
 	}
 
-	private Articles createArticleFromResultSet(ResultSet rs)
+	private Article createArticleFromResultSet(ResultSet rs)
 	{
-		Articles ar = null;
+		Article ar = null;
 		try
 		{
-			ar = new Articles();
+			ar = new Article();
 			ar.setContent(rs.getString("contenu_article"));
 			ar.setAuthorId(rs.getLong("id_auteur"));
-			ar.setCategory(rs.getLong("id_categorie"));
+			ar.setCategoryId(rs.getLong("id_categorie"));
 			ar.setTitle(rs.getString("titre_article"));
 			ar.setId(rs.getLong("id_article"));
 			ar.setDescription(rs.getString("description"));

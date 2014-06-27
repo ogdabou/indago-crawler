@@ -2,7 +2,7 @@ package giveme.common.beans;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class Articles
+public class Article
 {
 
 	private Long id;
@@ -11,8 +11,19 @@ public class Articles
 	private String aritcleCover;
 	private String description;
 	private Long authorId;
-	private Long category;
+	private Long categoryId;
 	private String url;
+	private String sources;
+
+	public String getSources()
+	{
+		return sources;
+	}
+
+	public void setSources(String sources)
+	{
+		this.sources = sources;
+	}
 
 	@JsonProperty(value = "publication_date")
 	public String publicationDate;
@@ -97,14 +108,32 @@ public class Articles
 		this.authorId = authorId;
 	}
 
-	public Long getCategory()
+	public Long getCategoryId()
 	{
-		return category;
+		return categoryId;
 	}
 
-	public void setCategory(Long category)
+	public void setCategoryId(Long category)
 	{
-		this.category = category;
+		categoryId = category;
 	}
 
+	@Override
+	public String toString()
+	{
+		// TODO Auto-generated method stub
+		return "[ url=" + url + ", categoryId=" + categoryId + ", authorId="
+				+ authorId + ", " + " description=" + description
+				+ ", articleCover=" + aritcleCover + ", content=" + content;
+	}
+
+	public void MergeWithDetailed(Article detailedArticle)
+	{
+		authorId = detailedArticle.getAuthorId();
+		content = detailedArticle.getContent();
+		sources = detailedArticle.getSources();
+		title = detailedArticle.getTitle();
+		url = detailedArticle.getUrl();
+		publicationDate = detailedArticle.getPublicationDate();
+	}
 }

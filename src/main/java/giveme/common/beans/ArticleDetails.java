@@ -7,6 +7,17 @@ public class ArticleDetails
 	private String imageUrl;
 	private String url;
 	private String title;
+	private String category;
+
+	public String getCategory()
+	{
+		return category;
+	}
+
+	public void setCategory(String category)
+	{
+		this.category = category;
+	}
 
 	public String getArticle_url()
 	{

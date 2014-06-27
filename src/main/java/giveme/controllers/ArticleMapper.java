@@ -1,23 +1,15 @@
 package giveme.controllers;
 
-import giveme.common.beans.Articles;
-
 import java.util.ArrayList;
-
-import org.codehaus.jackson.annotate.JsonProperty;
 
 public class ArticleMapper
 {
-	public Long id;
 	public ArrayList<String> title;
-	public String articleContent;
-	public String aritcleCover;
-	public ArrayList<String> description;
-	public Long authorId;
-	public Long category;
+	public ArrayList<String> content;
+	private ArrayList<String> author;
 	public String url;
-	@JsonProperty(value = "publication_date")
-	public ArrayList<String> publicationDate;
+	public ArrayList<String> publication_date;
+	private ArrayList<String> sources;
 
 	public String getUrl()
 	{
@@ -27,31 +19,6 @@ public class ArticleMapper
 	public void setUrl(String url)
 	{
 		this.url = url;
-	}
-
-	public ArrayList<String> getPublicationDate()
-	{
-		return publicationDate;
-	}
-
-	public void setPublicationDate(ArrayList<String> publicationDate)
-	{
-		this.publicationDate = publicationDate;
-	}
-
-	public Long getId()
-	{
-		return id;
-	}
-
-	public void setId(Long id)
-	{
-		this.id = id;
-	}
-
-	public String getArticleContent()
-	{
-		return articleContent;
 	}
 
 	public ArrayList<String> getTitle()
@@ -64,69 +31,44 @@ public class ArticleMapper
 		this.title = title;
 	}
 
-	public void setArticleContent(String articleContent)
+	public ArrayList<String> getContent()
 	{
-		this.articleContent = articleContent;
+		return content;
 	}
 
-	public String getAritcleCover()
+	public void setContent(ArrayList<String> content)
 	{
-		return aritcleCover;
+		this.content = content;
 	}
 
-	public void setAritcleCover(String aritcleCover)
+	public ArrayList<String> getAuthor()
 	{
-		this.aritcleCover = aritcleCover;
+		return author;
 	}
 
-	public ArrayList<String> getDescription()
+	public void setAuthor(ArrayList<String> author)
 	{
-		return description;
+		this.author = author;
 	}
 
-	public void setDescription(ArrayList<String> description)
+	public ArrayList<String> getPublication_date()
 	{
-		this.description = description;
+		return publication_date;
 	}
 
-	public Long getAuthorId()
+	public void setPublication_date(ArrayList<String> publication_date)
 	{
-		return authorId;
+		this.publication_date = publication_date;
 	}
 
-	public void setAuthorId(Long authorId)
+	public ArrayList<String> getSources()
 	{
-		this.authorId = authorId;
+		return sources;
 	}
 
-	public Long getCategory()
+	public void setSources(ArrayList<String> sources)
 	{
-		return category;
+		this.sources = sources;
 	}
 
-	public void setCategory(Long category)
-	{
-		this.category = category;
-	}
-
-	public Articles convert()
-	{
-		Articles cv = new Articles();
-		cv.setAritcleCover(getAritcleCover());
-		cv.setContent(getArticleContent());
-		cv.setId(getId());
-		cv.setAuthorId(getAuthorId());
-		if (getDescription() != null)
-		{
-			cv.setDescription(getDescription().get(0));
-		}
-		cv.setTitle(getTitle().get(0));
-		cv.setCategory(getCategory());
-		cv.setUrl(getUrl());
-		if (getPublicationDate() != null)
-		{
-			cv.setPublicationDate(getPublicationDate().get(0));
-		}
-		return cv;
-	}
 }
