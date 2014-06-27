@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="GiveMeAShow" id="Project9212301" database="MySql" >
+	<schema name="givemeashow" schemaname="givemeashow" defo="y" >
+		<table name="fb_answer" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="feedback_id" type="int" jt="4" mandatory="y" />
+			<column name="posted_date" type="datetime" jt="93" mandatory="y" >
+				<defo>CURRENT_DATE</defo>
+			</column>
+			<column name="content" type="varchar" length="300" jt="12" mandatory="y" />
+			<index name="pk_answer" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_answer" unique="NORMAL" >
+				<column name="feedback_id" />
+			</index>
+			<fk name="fk_answer_feedback" to_schema="givemeashow" to_table="feedback" >
+				<fk_column name="feedback_id" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="fb_kind" >
+			<column name="kind" type="varchar" length="10" jt="12" mandatory="y" />
+			<index name="pk_feedback_kind" unique="PRIMARY_KEY" >
+				<column name="kind" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="feedback" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="user_id" type="int" jt="4" mandatory="y" />
+			<column name="title" type="varchar" length="100" jt="12" />
+			<column name="kind" type="varchar" length="10" jt="12" />
+			<column name="content" type="varchar" length="600" jt="12" />
+			<column name="read" type="bool" jt="-7" >
+				<defo>&#039;false&#039;</defo>
+			</column>
+			<column name="posted_date" type="datetime" jt="93" mandatory="y" >
+				<defo>CURRENT_DATE</defo>
+			</column>
+			<index name="pk_feedback" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_feedback" unique="NORMAL" >
+				<column name="user_id" />
+			</index>
+			<index name="idx_feedback_0" unique="NORMAL" >
+				<column name="kind" />
+			</index>
+			<fk name="fk_feedback_user" to_schema="givemeashow" to_table="user" >
+				<fk_column name="user_id" pk="id" />
+			</fk>
+			<fk name="fk_feedback_feedback_kind" to_schema="givemeashow" to_table="fb_kind" >
+				<fk_column name="kind" pk="kind" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="feedback_answer" />
+		<table name="lang_iso" >
+			<column name="iso" type="varchar" length="2" jt="12" mandatory="y" />
+			<index name="pk_lang_iso" unique="PRIMARY_KEY" >
+				<column name="iso" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="season" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="name" type="varchar" length="300" jt="12" mandatory="y" />
+			<column name="position" type="int" jt="4" mandatory="y" >
+				<defo>0</defo>
+			</column>
+			<column name="icon_url" type="varchar" length="500" jt="12" />
+			<column name="show_id" type="int" jt="4" mandatory="y" />
+			<index name="pk_season" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_season" unique="NORMAL" >
+				<column name="show_id" />
+			</index>
+			<fk name="fk_season_show" to_schema="givemeashow" to_table="show" delete_action="setNull" >
+				<fk_column name="show_id" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="show" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="name" type="varchar" length="300" jt="12" mandatory="y" />
+			<column name="icon_url" type="varchar" length="500" jt="12" />
+			<index name="pk_show" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="subtitle" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="video_id" type="int" jt="4" mandatory="y" />
+			<column name="lang_iso" type="varchar" length="2" jt="12" mandatory="y" />
+			<column name="url" type="varchar" length="300" jt="12" mandatory="y" />
+			<index name="pk_subtitle" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_subtitle" unique="NORMAL" >
+				<column name="lang_iso" />
+			</index>
+			<index name="idx_subtitle_0" unique="NORMAL" >
+				<column name="video_id" />
+			</index>
+			<fk name="fk_subtitle_lang_iso" to_schema="givemeashow" to_table="lang_iso" >
+				<fk_column name="lang_iso" pk="iso" />
+			</fk>
+			<fk name="fk_subtitle_video" to_schema="givemeashow" to_table="video" >
+				<fk_column name="video_id" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="table_0" />
+		<table name="user" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="login" type="varchar" length="32" jt="12" mandatory="y" />
+			<column name="password" type="varchar" length="32" jt="12" mandatory="y" />
+			<column name="is_admin" type="bool" jt="-7" mandatory="y" >
+				<defo>0</defo>
+			</column>
+			<column name="invite_code" type="varchar" length="32" jt="12" mandatory="y" />
+			<column name="time_spent" type="bigint" jt="-5" mandatory="y" unsigned="y" >
+				<defo>0</defo>
+			</column>
+			<column name="default_lang" type="varchar" length="2" jt="12" >
+				<defo>&#039;fr&#039;</defo>
+			</column>
+			<column name="use_subtitles" type="bool" jt="-7" >
+				<defo>&#039;false&#039;</defo>
+			</column>
+			<column name="subtitle_default_lang" type="varchar" length="2" jt="12" mandatory="y" >
+				<defo>&#039;fr&#039;</defo>
+			</column>
+			<column name="confirmed" type="bool" jt="-7" >
+				<defo>&#039;false&#039;</defo>
+			</column>
+			<column name="email" type="varchar" length="32" jt="12" mandatory="y" />
+			<index name="pk_user" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_user" unique="NORMAL" >
+				<column name="default_lang" />
+			</index>
+			<index name="idx_user_0" unique="NORMAL" >
+				<column name="subtitle_default_lang" />
+			</index>
+			<fk name="fk_user_lang_iso" to_schema="givemeashow" to_table="lang_iso" >
+				<fk_column name="default_lang" pk="iso" />
+			</fk>
+			<fk name="fk_user_default_sub_lang_iso" to_schema="givemeashow" to_table="lang_iso" >
+				<fk_column name="subtitle_default_lang" pk="iso" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="video" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="title" type="varchar" length="150" jt="12" mandatory="y" />
+			<column name="season_id" type="int" jt="4" >
+				<defo>0</defo>
+			</column>
+			<column name="lang_iso" type="varchar" length="2" jt="12" mandatory="y" >
+				<defo>&#039;fr&#039;</defo>
+			</column>
+			<column name="position" type="int" jt="4" mandatory="y" >
+				<defo>0</defo>
+			</column>
+			<index name="pk_video" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_video" unique="NORMAL" >
+				<column name="season_id" />
+			</index>
+			<index name="idx_video_0" unique="NORMAL" >
+				<column name="lang_iso" />
+			</index>
+			<fk name="fk_video_season" to_schema="givemeashow" to_table="season" delete_action="setNull" >
+				<fk_column name="season_id" pk="id" />
+			</fk>
+			<fk name="fk_video_lang_iso" to_schema="givemeashow" to_table="lang_iso" >
+				<fk_column name="lang_iso" pk="iso" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+	</schema>
+	<layout id="Layout9212303" name="GiveMeAShow" joined_routing="y" >
+		<entity schema="givemeashow" name="show" color="d0def5" x="390" y="45" />
+		<entity schema="givemeashow" name="user" color="d0def5" x="45" y="45" />
+		<entity schema="givemeashow" name="season" color="d0def5" x="510" y="120" />
+		<entity schema="givemeashow" name="lang_iso" color="d0def5" x="270" y="180" />
+		<entity schema="givemeashow" name="subtitle" color="d0def5" x="420" y="285" />
+		<entity schema="givemeashow" name="video" color="d0def5" x="645" y="240" />
+		<entity schema="givemeashow" name="feedback" color="d0def5" x="75" y="345" />
+		<entity schema="givemeashow" name="fb_kind" color="d0def5" x="225" y="435" />
+		<entity schema="givemeashow" name="fb_answer" color="d0def5" x="225" y="315" />
+		<group name="Group_Show" color="c4e0f9" >
+			<entity schema="givemeashow" name="video" />
+			<entity schema="givemeashow" name="show" />
+			<entity schema="givemeashow" name="season" />
+			<entity schema="givemeashow" name="subtitle" />
+		</group>
+		<group name="Group_User" color="c4e0f9" >
+			<entity schema="givemeashow" name="user" />
+		</group>
+		<group name="Group_Utilities" color="c4e0f9" >
+			<entity schema="givemeashow" name="lang_iso" />
+		</group>
+		<group name="Group_Feedback" color="c4e0f9" >
+			<entity schema="givemeashow" name="fb_kind" />
+			<entity schema="givemeashow" name="feedback" />
+			<entity schema="givemeashow" name="fb_answer" />
+		</group>
+		<script name="Sql" id="SQL2136797" >
+			<string><![CDATA[CREATE SCHEMA givemeashow;
+
+CREATE TABLE givemeashow.fb_kind ( 
+	kind                 varchar(10)  NOT NULL  ,
+	CONSTRAINT pk_feedback_kind PRIMARY KEY ( kind )
+ ) engine=InnoDB;
+
+CREATE TABLE givemeashow.feedback_answer ( 
+ );
+
+CREATE TABLE givemeashow.lang_iso ( 
+	iso                  varchar(2)  NOT NULL  ,
+	CONSTRAINT pk_lang_iso PRIMARY KEY ( iso )
+ ) engine=InnoDB;
+
+CREATE TABLE givemeashow.show ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	name                 varchar(300)  NOT NULL  ,
+	icon_url             varchar(500)    ,
+	CONSTRAINT pk_show PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE TABLE givemeashow.table_0 ( 
+ );
+
+CREATE TABLE givemeashow.user ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	login                varchar(32)  NOT NULL  ,
+	password             varchar(32)  NOT NULL  ,
+	is_admin             bool  NOT NULL DEFAULT 0 ,
+	invite_code          varchar(32)  NOT NULL  ,
+	time_spent           bigint UNSIGNED NOT NULL DEFAULT 0 ,
+	default_lang         varchar(2)   DEFAULT 'fr' ,
+	use_subtitles        bool   DEFAULT 'false' ,
+	subtitle_default_lang varchar(2)  NOT NULL DEFAULT 'fr' ,
+	confirmed            bool   DEFAULT 'false' ,
+	email                varchar(32)  NOT NULL  ,
+	CONSTRAINT pk_user PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE INDEX idx_user ON givemeashow.user ( default_lang );
+
+CREATE INDEX idx_user_0 ON givemeashow.user ( subtitle_default_lang );
+
+CREATE TABLE givemeashow.feedback ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	user_id              int  NOT NULL  ,
+	title                varchar(100)    ,
+	kind                 varchar(10)    ,
+	content              varchar(600)    ,
+	read                 bool   DEFAULT 'false' ,
+	posted_date          datetime  NOT NULL DEFAULT CURRENT_DATE ,
+	CONSTRAINT pk_feedback PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE INDEX idx_feedback ON givemeashow.feedback ( user_id );
+
+CREATE INDEX idx_feedback_0 ON givemeashow.feedback ( kind );
+
+CREATE TABLE givemeashow.season ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	name                 varchar(300)  NOT NULL  ,
+	position             int  NOT NULL DEFAULT 0 ,
+	icon_url             varchar(500)    ,
+	show_id              int  NOT NULL  ,
+	CONSTRAINT pk_season PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE INDEX idx_season ON givemeashow.season ( show_id );
+
+CREATE TABLE givemeashow.video ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	title                varchar(150)  NOT NULL  ,
+	season_id            int   DEFAULT 0 ,
+	lang_iso             varchar(2)  NOT NULL DEFAULT 'fr' ,
+	position             int  NOT NULL DEFAULT 0 ,
+	CONSTRAINT pk_video PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE INDEX idx_video ON givemeashow.video ( season_id );
+
+CREATE INDEX idx_video_0 ON givemeashow.video ( lang_iso );
+
+CREATE TABLE givemeashow.fb_answer ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	feedback_id          int  NOT NULL  ,
+	posted_date          datetime  NOT NULL DEFAULT CURRENT_DATE ,
+	CONSTRAINT pk_answer PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE INDEX idx_answer ON givemeashow.fb_answer ( feedback_id );
+
+CREATE TABLE givemeashow.subtitle ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	video_id             int  NOT NULL  ,
+	lang_iso             varchar(2)  NOT NULL  ,
+	url                  varchar(300)  NOT NULL  ,
+	CONSTRAINT pk_subtitle PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE INDEX idx_subtitle ON givemeashow.subtitle ( lang_iso );
+
+CREATE INDEX idx_subtitle_0 ON givemeashow.subtitle ( video_id );
+
+ALTER TABLE givemeashow.fb_answer ADD CONSTRAINT fk_answer_feedback FOREIGN KEY ( feedback_id ) REFERENCES givemeashow.feedback( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.feedback ADD CONSTRAINT fk_feedback_user FOREIGN KEY ( user_id ) REFERENCES givemeashow.user( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.feedback ADD CONSTRAINT fk_feedback_feedback_kind FOREIGN KEY ( kind ) REFERENCES givemeashow.fb_kind( kind ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.season ADD CONSTRAINT fk_season_show FOREIGN KEY ( show_id ) REFERENCES givemeashow.show( id ) ON DELETE SET NULL ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.subtitle ADD CONSTRAINT fk_subtitle_lang_iso FOREIGN KEY ( lang_iso ) REFERENCES givemeashow.lang_iso( iso ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.subtitle ADD CONSTRAINT fk_subtitle_video FOREIGN KEY ( video_id ) REFERENCES givemeashow.video( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.user ADD CONSTRAINT fk_user_lang_iso FOREIGN KEY ( default_lang ) REFERENCES givemeashow.lang_iso( iso ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.user ADD CONSTRAINT fk_user_default_sub_lang_iso FOREIGN KEY ( subtitle_default_lang ) REFERENCES givemeashow.lang_iso( iso ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.video ADD CONSTRAINT fk_video_season FOREIGN KEY ( season_id ) REFERENCES givemeashow.season( id ) ON DELETE SET NULL ON UPDATE NO ACTION;
+
+ALTER TABLE givemeashow.video ADD CONSTRAINT fk_video_lang_iso FOREIGN KEY ( lang_iso ) REFERENCES givemeashow.lang_iso( iso ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+]]></string>
+		</script>
+	</layout>
+</project>
