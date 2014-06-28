@@ -1,10 +1,8 @@
-package giveme.controllers;
-
-import giveme.common.beans.ArticleDetails;
+package giveme.common.models.json;
 
 import java.util.ArrayList;
 
-public class ArticleDescriptionJson
+public class ArticlesDetailsJson
 {
 	private ArrayList<String> article_url;
 	private ArrayList<String> description;
@@ -71,28 +69,5 @@ public class ArticleDescriptionJson
 	public void setTitle(ArrayList<String> title)
 	{
 		this.title = title;
-	}
-
-	public ArticleDetails convert()
-	{
-		ArticleDetails articleDetails = new ArticleDetails();
-		if (getArticle_url() != null)
-		{
-			articleDetails.setArticle_url(getArticle_url().get(0));
-		}
-		if (getDescription() != null)
-		{
-			articleDetails.setDescription(getDescription().get(0));
-		}
-		if (getImagUrl() != null)
-		{
-			articleDetails.setImageUrl(getImagUrl().get(0));
-		}
-		if (getTitle() != null)
-		{
-			articleDetails.setTitle(getTitle().get(0));
-		}
-		articleDetails.setUrl(getUrl());
-		return articleDetails;
 	}
 }

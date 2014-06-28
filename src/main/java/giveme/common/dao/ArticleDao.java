@@ -66,7 +66,7 @@ public class ArticleDao
 
 			final PreparedStatement statement = jdbcConnection
 					.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-			statement.setString(1, "coucou");
+			statement.setString(1, ar.getTitle());
 			statement.setString(2, ar.getContent());
 			statement.setString(3, ar.getAritcleCover());
 			statement.setString(4, ar.getDescription());
@@ -78,13 +78,36 @@ public class ArticleDao
 			{
 				ar.setId(idresult.getLong("id_article"));
 			}
-
+			LOGGER.info("Saved Article " + ar.getTitle());
 			jdbcConnection.close();
 		} catch (Exception e)
 		{
 			e.printStackTrace();
-
 		}
+	}
+
+	public Article findByTitle(String title)
+	{
+		jdbcConnection = connector.getConnection();
+		Article article = null;
+		try
+		{
+			final String query = "select * from " + TABLE_NAME
+					+ " WHERE titre_article = ?";
+			PreparedStatement statement = jdbcConnection
+					.prepareStatement(query);
+			statement.setString(1, title);
+			ResultSet rs = statement.executeQuery();
+			while (rs.next())
+			{
+				article = createArticleFromResultSet(rs);
+			}
+			return article;
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private Article createArticleFromResultSet(ResultSet rs)
@@ -99,7 +122,6 @@ public class ArticleDao
 			ar.setTitle(rs.getString("titre_article"));
 			ar.setId(rs.getLong("id_article"));
 			ar.setDescription(rs.getString("description"));
-			LOGGER.info("added " + ar);
 		} catch (SQLException e)
 		{
 			LOGGER.error(e.getMessage());

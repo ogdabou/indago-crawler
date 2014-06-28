@@ -1,4 +1,4 @@
-package giveme.controllers;
+package giveme.common.models.json;
 
 import java.util.ArrayList;
 

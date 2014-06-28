@@ -1,11 +1,11 @@
-package giveme.controllers;
+package giveme.common.models.json;
 
 import java.util.ArrayList;
 
-public class ArticleDescriptionMapper
+public class ArticlesDetailsMapper
 {
 	private ArrayList<String> category;
-	private ArrayList<ArticleDescriptionJson> variants;
+	private ArrayList<ArticlesDetailsJson> variants;
 	private String url;
 
 	public String getUrl()
@@ -28,12 +28,12 @@ public class ArticleDescriptionMapper
 		this.category = category;
 	}
 
-	public ArrayList<ArticleDescriptionJson> getVariants()
+	public ArrayList<ArticlesDetailsJson> getVariants()
 	{
 		return variants;
 	}
 
-	public void setVariants(ArrayList<ArticleDescriptionJson> variants)
+	public void setVariants(ArrayList<ArticlesDetailsJson> variants)
 	{
 		this.variants = variants;
 	}

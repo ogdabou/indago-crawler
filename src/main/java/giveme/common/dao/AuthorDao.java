@@ -51,7 +51,7 @@ public class AuthorDao extends IDao<Author>
 			{
 				toSave.setAuthorId(rs.getLong("id_auteur"));
 			}
-			LOGGER.info("added " + toSave);
+			LOGGER.info("Saved author " + toSave.getAuthor());
 			jdbcConnection.close();
 		} catch (Exception e)
 		{
@@ -91,7 +91,6 @@ public class AuthorDao extends IDao<Author>
 			author = new Author();
 			author.setAuthorId(rs.getLong("id_auteur"));
 			author.setAuthor(rs.getString("nom_auteur"));
-			LOGGER.info("added " + author);
 		} catch (SQLException e)
 		{
 			LOGGER.error(e.getMessage());

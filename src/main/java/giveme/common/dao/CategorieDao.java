@@ -52,6 +52,7 @@ public class CategorieDao extends IDao<Categorie>
 				toSave.setCategoryId(rs.getLong("id_categorie"));
 			}
 			jdbcConnection.close();
+			LOGGER.info("Saved category " + toSave.getCategory());
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -90,7 +91,6 @@ public class CategorieDao extends IDao<Categorie>
 			cat = new Categorie();
 			cat.setCategory(rs.getString("libelle_categorie"));
 			cat.setCategoryId(rs.getLong("id_categorie"));
-			LOGGER.info("added " + cat);
 		} catch (SQLException e)
 		{
 			LOGGER.error(e.getMessage());

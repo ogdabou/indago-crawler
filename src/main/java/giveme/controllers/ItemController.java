@@ -3,12 +3,14 @@ package giveme.controllers;
 import static giveme.shared.ItemType.ARTICLE;
 import static giveme.shared.ItemType.ARTICLE_DETAILS;
 import giveme.common.beans.Article;
-import giveme.common.beans.ArticleDetails;
 import giveme.common.beans.Author;
 import giveme.common.beans.Categorie;
 import giveme.common.dao.ArticleDao;
 import giveme.common.dao.AuthorDao;
 import giveme.common.dao.CategorieDao;
+import giveme.common.models.json.ArticleMapper;
+import giveme.common.models.json.ArticlesDetailsJson;
+import giveme.common.models.json.ArticlesDetailsMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,34 +60,13 @@ public class ItemController
 	@RequestMapping(value = "/update/items", method = RequestMethod.GET)
 	public void updateItemsApi() throws IOException
 	{
-		// List<Articles> articleList = getArticles();
-		List<ArticleDetails> details = getArticlesDetails();
-		// articleList = complete(articleList, details);
-		articleDao.list();
-	}
+		List<Article> articles = getArticlesDetails();
 
-	/**
-	 * 
-	 * @param articleList
-	 * @param details
-	 * @return
-	 */
-	private List<Article> complete(List<Article> articleList,
-			List<ArticleDetails> details)
-	{
-		for (ArticleDetails articleDetails : details)
+		List<Article> ar = articleDao.list();
+		for (Article article : ar)
 		{
-			for (Article article : articleList)
-			{
-				String computedUrl = article.getUrl().substring(
-						article.getUrl().lastIndexOf("/"));
-				if (articleDetails.getArticle_url().equals(computedUrl))
-				{
-					LOGGER.info("coucou :)");
-				}
-			}
+			LOGGER.info(article.getTitle());
 		}
-		return null;
 	}
 
 	/**
@@ -93,9 +74,9 @@ public class ItemController
 	 * @return
 	 * @throws IOException
 	 */
-	private List<ArticleDetails> getArticlesDetails() throws IOException
+	private List<Article> getArticlesDetails() throws IOException
 	{
-		List<ArticleDetails> list = new ArrayList<>();
+		List<Article> articleList = new ArrayList<>();
 		String job = "4002/5/6";
 		String start = "0";
 		String end = "10";
@@ -118,8 +99,8 @@ public class ItemController
 			mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 			JsonNode rootNode = mapper.readTree(jsonValue);
-			String itemType = rootNode.path("_type").toString()
-					.replaceAll("\"", "");
+
+			String itemType = extractItemType(rootNode);
 
 			if (ARTICLE_DETAILS.getType().equals(itemType))
 			{
@@ -128,22 +109,64 @@ public class ItemController
 			} else if (ARTICLE.getType().equals(itemType))
 			{
 				Article article = extractArticle(jsonValue, mapper);
+				articleList.add(article);
+			}
+		}
+
+		articleList = mergeDetailsAndContent(articleList, articles);
+		in.close();
+		return articleList;
+	}
+
+	/**
+	 * 
+	 * @param articleList
+	 * @param articles
+	 * @return
+	 */
+	private List<Article> mergeDetailsAndContent(List<Article> articleList,
+			List<Article> articles)
+	{
+		for (Article articleWithoutDetails : articleList)
+		{
+			if (!articleExists(articleWithoutDetails.getTitle()))
+			{
 				for (Article detailedArticleWithoutcontent : articles)
 				{
-					if (article.getTitle().equals(
+					if (articleWithoutDetails.getTitle().equals(
 							detailedArticleWithoutcontent.getTitle()))
 					{
 						detailedArticleWithoutcontent
-								.MergeWithDetailed(article);
-						LOGGER.info("Article " + article.getTitle()
-								+ " merged.");
+								.fillMissingParams(articleWithoutDetails);
 						articleDao.save(detailedArticleWithoutcontent);
 					}
 				}
 			}
 		}
-		in.close();
-		return list;
+		return articles;
+	}
+
+	private boolean articleExists(String title)
+	{
+		Article art = articleDao.findByTitle(title);
+		if (art == null)
+		{
+			return false;
+		}
+		LOGGER.info("Article " + title + " exists");
+		return true;
+	}
+
+	/**
+	 * 
+	 * @param rootNode
+	 * @return
+	 */
+	private String extractItemType(JsonNode rootNode)
+	{
+		String itemType = rootNode.path("_type").toString()
+				.replaceAll("\"", "");
+		return itemType;
 	}
 
 	/**
@@ -160,6 +183,7 @@ public class ItemController
 	{
 		ArticleMapper articleMap = mapper.readValue(jsonValue,
 				ArticleMapper.class);
+
 		Author author = buildAuthor(articleMap);
 
 		Article art = new Article();
@@ -200,12 +224,16 @@ public class ItemController
 		if (articleMap.getAuthor() != null)
 		{
 			String authorName = articleMap.getAuthor().get(0);
-			if ((author = authordao.findByName(authorName)) == null)
+			author = authordao.findByName(authorName);
+			if (author == null)
 			{
 				LOGGER.info("author " + author + " saved");
 				author = new Author();
 				author.setAuthor(authorName);
 				authordao.save(author);
+			} else
+			{
+				LOGGER.info("Author " + author.getAuthor() + " already exist");
 			}
 			return author;
 		}
@@ -236,8 +264,8 @@ public class ItemController
 			ObjectMapper mapper) throws IOException, JsonParseException,
 			JsonMappingException
 	{
-		ArticleDescriptionMapper articleDescription = mapper.readValue(
-				jsonValue, ArticleDescriptionMapper.class);
+		ArticlesDetailsMapper articleDescription = mapper.readValue(jsonValue,
+				ArticlesDetailsMapper.class);
 
 		Categorie category = buildCategory(articleDescription);
 		return fillArticlesWithDetails(articleDescription, category);
@@ -250,16 +278,13 @@ public class ItemController
 	 * @return
 	 */
 	public ArrayList<Article> fillArticlesWithDetails(
-			ArticleDescriptionMapper articleDescription, Categorie category)
+			ArticlesDetailsMapper articleDescription, Categorie category)
 	{
 		ArrayList<Article> articleList = new ArrayList<>();
-		for (ArticleDescriptionJson detailsJson : articleDescription
-				.getVariants())
+		for (ArticlesDetailsJson detailsJson : articleDescription.getVariants())
 		{
 			Article article = new Article();
 			article.setCategoryId(category.getCategoryId());
-
-			ArticleDetails detail = new ArticleDetails();
 
 			if (detailsJson.getArticle_url() != null)
 			{
@@ -301,7 +326,7 @@ public class ItemController
 	 * @param articleDescription
 	 * @return
 	 */
-	private Categorie buildCategory(ArticleDescriptionMapper articleDescription)
+	private Categorie buildCategory(ArticlesDetailsMapper articleDescription)
 	{
 		Categorie categorie = null;
 		if (articleDescription.getCategory() != null)

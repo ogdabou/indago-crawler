@@ -127,7 +127,7 @@ public class Article
 				+ ", articleCover=" + aritcleCover + ", content=" + content;
 	}
 
-	public void MergeWithDetailed(Article detailedArticle)
+	public void fillMissingParams(Article detailedArticle)
 	{
 		authorId = detailedArticle.getAuthorId();
 		content = detailedArticle.getContent();
