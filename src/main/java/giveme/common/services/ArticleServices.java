@@ -1,4 +1,4 @@
-package giveme.controllers;
+package giveme.common.services;
 
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;

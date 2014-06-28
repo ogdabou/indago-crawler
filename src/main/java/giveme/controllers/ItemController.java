@@ -60,7 +60,7 @@ public class ItemController
 	@RequestMapping(value = "/update/items", method = RequestMethod.GET)
 	public void updateItemsApi() throws IOException
 	{
-		List<Article> articles = getArticlesDetails();
+		List<Article> articles = findArticles();
 
 		List<Article> ar = articleDao.list();
 		for (Article article : ar)
@@ -74,7 +74,7 @@ public class ItemController
 	 * @return
 	 * @throws IOException
 	 */
-	private List<Article> getArticlesDetails() throws IOException
+	private List<Article> findArticles() throws IOException
 	{
 		List<Article> articleList = new ArrayList<>();
 		String job = "4002/5/6";
