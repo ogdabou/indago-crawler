@@ -11,15 +11,15 @@ import java.sql.Statement;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class SpiderDAO extends IDao<Spider>
+public class SpiderDao extends IDao<Spider>
 {
 	@Autowired
 	JDBCConnector	connector;
 
-	public SpiderDAO()
+	public SpiderDao()
 	{
 		TABLE_NAME = "spider";
-		LOGGER = Logger.getLogger(SpiderDAO.class.getName());
+		LOGGER = Logger.getLogger(SpiderDao.class.getName());
 	}
 
 	@Override
