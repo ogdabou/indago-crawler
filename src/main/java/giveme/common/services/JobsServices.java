@@ -26,7 +26,7 @@ public class JobsServices
 
 	public JobsServices()
 	{
-		getLatestFinishedJobs();
+		// getLatestFinishedJobs();
 	}
 
 	public List<ScrapingJob> getLatestFinishedJobs()

@@ -2,13 +2,16 @@
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="
         http://www.springframework.org/schema/beans     
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context-3.0.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
     <!-- Tell to Spring that we will use annotations such as @Controller or @RequestMapping -->
     <mvc:annotation-driven/>
@@ -25,6 +28,7 @@
 			<value>.jsp</value>
 		</property>
 	</bean>
+	<task:annotation-driven/>
 	
 	<!-- <bean id="authService" class="com.cap.theater.common.services.AuthorizationService"/> -->
 	
