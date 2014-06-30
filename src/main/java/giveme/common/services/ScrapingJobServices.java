@@ -14,29 +14,40 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 @Component
 @Repository
-public class JobsServices
+public class ScrapingJobServices
 {
-	private final String	projectId	= "4002";
-	public static Logger	LOGGER		= Logger.getLogger(JobsServices.class.getName());
+	public static Logger	LOGGER				= Logger.getLogger(ScrapingJobServices.class.getName());
 
-	public JobsServices()
+	@Value("${scrapingJobsApiUrl}")
+	private String			scrapingJobsApiUrl;
+
+	@Value("${scrapingApiKey}")
+	private String			scrapingApiKey;
+
+	@Value("${scrapingJobsNumberToGet}")
+	private String			scrapingJobsNumberToGet;
+
+	@Value("${scrapingProjectId}")
+	private final String	scrapingProjectId	= "4002";
+
+	public ScrapingJobServices()
 	{
 		// getLatestFinishedJobs();
 	}
 
-	public List<ScrapingJob> getLatestFinishedJobs()
+	public List<ScrapingJob> getLatestFinishedJobs(String spiderName)
 	{
 		List<ScrapingJob> jobs = new ArrayList<>();
 
-		String query = "https://dash.scrapinghub.com/api/jobs/list.json?project=" + projectId
-				+ "&apikey=78c8f0b2681f4203a31f5277c2696c88" + "&spider=" + "VOLTAIRE_FOCUS" + "&state=" + "finished"
-				+ "&cout=" + "10";
-		// LOGGER.info("query : " + query);
+		String query = "https://dash.scrapinghub.com/api/jobs/list.json?project=" + scrapingProjectId + "&apikey="
+				+ scrapingApiKey + "&spider=" + spiderName + "&state=" + "finished" + "&count="
+				+ scrapingJobsNumberToGet;
 		URL url;
 		try
 		{
@@ -47,7 +58,7 @@ public class JobsServices
 			String jsonValue;
 			while ((jsonValue = in.readLine()) != null)
 			{
-				LOGGER.debug("Full datas received :" + jsonValue);
+				LOGGER.info("Full datas received :" + jsonValue);
 				ObjectMapper mapper = new ObjectMapper();
 				mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 				mapper.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -60,10 +71,9 @@ public class JobsServices
 			}
 		} catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return jobs;
 
 	}
 }

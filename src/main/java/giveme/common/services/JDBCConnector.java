@@ -1,18 +1,27 @@
-package giveme.controllers;
+package giveme.common.services;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JDBCConnector
 {
 
-	public static Logger LOGGER = Logger.getLogger(JDBCConnector.class
-			.getName());
+	public static Logger	LOGGER	= Logger.getLogger(JDBCConnector.class.getName());
+
+	@Value("${dbUrl}")
+	private String			jdbcUrl;
+
+	@Value("${dbUser}")
+	private String			jdbcUser;
+
+	@Value("${dbPwd}")
+	private String			jdbcPw;
 
 	public JDBCConnector()
 	{
@@ -35,9 +44,7 @@ public class JDBCConnector
 		try
 		{
 
-			connection = DriverManager.getConnection(
-					"jdbc:postgresql://localhost:5432/postgres", "postgres",
-					"root");
+			connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPw);
 
 		} catch (SQLException e)
 		{
@@ -47,7 +54,8 @@ public class JDBCConnector
 		}
 		if (connection != null)
 		{
-		} else
+		}
+		else
 		{
 			LOGGER.info("Failed to make connection!");
 		}

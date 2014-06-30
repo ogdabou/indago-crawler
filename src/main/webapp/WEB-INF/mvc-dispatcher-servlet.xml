@@ -29,6 +29,7 @@
 		</property>
 	</bean>
 	<task:annotation-driven/>
+	<context:property-placeholder location="classpath:indago.properties" />
 	
 	<!-- <bean id="authService" class="com.cap.theater.common.services.AuthorizationService"/> -->
 	

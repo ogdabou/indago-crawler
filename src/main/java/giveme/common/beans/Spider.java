@@ -2,8 +2,17 @@ package giveme.common.beans;
 
 public class Spider
 {
-
 	private String	spider;
+
+	public Spider(String spiderName)
+	{
+		spider = spiderName;
+	}
+
+	public Spider()
+	{
+
+	}
 
 	public String getSpider()
 	{

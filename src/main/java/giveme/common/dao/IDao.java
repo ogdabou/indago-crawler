@@ -1,6 +1,6 @@
 package giveme.common.dao;
 
-import giveme.controllers.JDBCConnector;
+import giveme.common.services.JDBCConnector;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

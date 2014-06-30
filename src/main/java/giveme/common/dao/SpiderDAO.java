@@ -1,7 +1,7 @@
 package giveme.common.dao;
 
 import giveme.common.beans.Spider;
-import giveme.controllers.JDBCConnector;
+import giveme.common.services.JDBCConnector;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,7 +10,11 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
+@Component
+@Repository
 public class SpiderDao extends IDao<Spider>
 {
 	@Autowired
@@ -41,7 +45,7 @@ public class SpiderDao extends IDao<Spider>
 			{
 				toSave.setSpider(rs.getString("spider"));
 			}
-			LOGGER.info("Saved author " + toSave.getSpider());
+			LOGGER.info("Saved spider " + toSave.getSpider());
 			connection.close();
 		} catch (Exception e)
 		{
@@ -55,6 +59,28 @@ public class SpiderDao extends IDao<Spider>
 		Spider sp = new Spider();
 		sp.setSpider(rs.getString("spider"));
 		return sp;
+	}
+
+	public Spider findByName(String spiderName)
+	{
+		connection = connector.getConnection();
+		Spider spider = null;
+		try
+		{
+			final String query = "select * from " + TABLE_NAME + " where spider = ?";
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setString(1, spiderName);
+			ResultSet rs = statement.executeQuery();
+			while (rs.next())
+			{
+				spider = createObjectFromResultSet(rs);
+			}
+			return spider;
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return spider;
 	}
 
 }

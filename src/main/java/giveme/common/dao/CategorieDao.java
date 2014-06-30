@@ -1,7 +1,7 @@
 package giveme.common.dao;
 
 import giveme.common.beans.Categorie;
-import giveme.controllers.JDBCConnector;
+import giveme.common.services.JDBCConnector;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,9 +26,9 @@ public class CategorieDao extends IDao<Categorie>
 	}
 
 	@Autowired
-	JDBCConnector connector;
+	JDBCConnector		connector;
 
-	private Connection jdbcConnection;
+	private Connection	jdbcConnection;
 
 	@Override
 	public void save(Categorie toSave)
@@ -38,11 +38,9 @@ public class CategorieDao extends IDao<Categorie>
 
 		try
 		{
-			final String query = "insert into " + TABLE_NAME
-					+ " (libelle_categorie) " + " VALUES (?);";
+			final String query = "insert into " + TABLE_NAME + " (libelle_categorie) " + " VALUES (?);";
 
-			final PreparedStatement statement = jdbcConnection
-					.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
 			statement.setString(1, toSave.getCategory());
 			statement.executeUpdate();
@@ -59,16 +57,15 @@ public class CategorieDao extends IDao<Categorie>
 		}
 	}
 
-	public Categorie findByName(int categoryName)
+	public Categorie findByName(String categoryName)
 	{
 		connection = connector.getConnection();
-		Categorie cat = new Categorie();
+		Categorie cat = null;
 		try
 		{
-			final String query = "select * from " + TABLE_NAME
-					+ " WHERE libelle_categorie = ?";
+			final String query = "select * from " + TABLE_NAME + " WHERE libelle_categorie = ?";
 			PreparedStatement statement = connection.prepareStatement(query);
-			statement.setInt(1, categoryName);
+			statement.setString(1, categoryName);
 			ResultSet rs = statement.executeQuery();
 			while (rs.next())
 			{
@@ -82,8 +79,7 @@ public class CategorieDao extends IDao<Categorie>
 	}
 
 	@Override
-	public Categorie createObjectFromResultSet(ResultSet rs)
-			throws SQLException
+	public Categorie createObjectFromResultSet(ResultSet rs) throws SQLException
 	{
 		Categorie cat = null;
 		try
