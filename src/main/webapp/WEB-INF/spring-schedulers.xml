@@ -21,6 +21,4 @@
 
 	<task:scheduler id="crawlerScheduler" pool-size="10" />
 
-
-
 </beans>

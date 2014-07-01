@@ -139,8 +139,11 @@ public class ArticleServices
 	 *
 	 * @param articleContent
 	 */
-	public String computeSrcUrls(String articleContent, String url)
+	public String computeSrcUrls(Article article)
 	{
+		String url = article.getUrl();
+		String articleContent = article.getContent();
+
 		int lastSlash = url.lastIndexOf("/");
 		String contextPath = url.substring(0, lastSlash);
 
@@ -148,18 +151,16 @@ public class ArticleServices
 		Elements imgs = content.select("img");
 		for (Element element : imgs)
 		{
-			String imgUrl = element.attr("url");
+			String imgUrl = element.attr("src");
+			String separator = "";
 			if (imgUrl.indexOf("/") != 0)
 			{
-				LOGGER.info("img url " + imgUrl + " is relative");
-				String computedImgUrl = contextPath + imgUrl;
-				element.attr("url", computedImgUrl);
-				LOGGER.info("Final element is : " + element.toString());
+				separator = "/";
 			}
-			else
-			{
-				//
-			}
+			LOGGER.debug("Start element is : " + imgUrl + " is relative");
+			String computedImgUrl = contextPath + separator + imgUrl;
+			element.attr("src", computedImgUrl);
+			LOGGER.debug("Final element is : " + element.toString());
 
 		}
 		return content.toString();
@@ -181,7 +182,8 @@ public class ArticleServices
 				if (articleWithoutDetails.getTitle().equals(detailedArticleWithoutcontent.getTitle()))
 				{
 					detailedArticleWithoutcontent.fillMissingParams(articleWithoutDetails);
-					saveOrUpdateIfExists(articleWithoutDetails, detailedArticleWithoutcontent);
+					detailedArticleWithoutcontent.setContent(computeSrcUrls(detailedArticleWithoutcontent));
+					saveOrUpdateIfExists(detailedArticleWithoutcontent);
 				}
 			}
 		}
@@ -193,15 +195,15 @@ public class ArticleServices
 	 * @param articleWithoutDetails
 	 * @param detailedArticleWithoutcontent
 	 */
-	private void saveOrUpdateIfExists(Article articleWithoutDetails, Article detailedArticleWithoutcontent)
+	private void saveOrUpdateIfExists(Article article)
 	{
-		if (!articleExists(articleWithoutDetails.getTitle()))
+		if (!articleExists(article.getTitle()))
 		{
-			articleDao.save(detailedArticleWithoutcontent);
+			articleDao.save(article);
 		}
 		else
 		{
-			articleDao.update(detailedArticleWithoutcontent);
+			articleDao.update(article);
 		}
 	}
 
