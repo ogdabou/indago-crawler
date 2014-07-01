@@ -6,12 +6,15 @@ import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-@EnableScheduling
-@Service
+/**
+ * This class is the scheduled crawler service. See spring-schedulers.xml
+ * 
+ * @author ogdabou
+ *
+ */
+@Service("scheduledCrawler")
 public class ScheduledCrawler
 {
 	public static Logger	LOGGER	= Logger.getLogger(ScheduledCrawler.class.getName());
@@ -22,14 +25,12 @@ public class ScheduledCrawler
 	@Autowired
 	private ArticleServices	articleService;
 
-	private int				runned	= 0;
-
-	@Scheduled(fixedDelay = 300000)
+	/**
+	 * This function is scheduled, see spring-schedulers.xml
+	 */
 	public void startCrawl()
 	{
-		LOGGER.info("RUNNING " + runned);
 		articleService.refreshAll();
-		runned++;
 	}
 
 	@PostConstruct

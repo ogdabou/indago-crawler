@@ -20,13 +20,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ArticleDao
 {
-	private final String TABLE_NAME = "articles";
-	public static Logger LOGGER = Logger.getLogger(ArticleDao.class.getName());
+	private final String	TABLE_NAME	= "articles";
+	public static Logger	LOGGER		= Logger.getLogger(ArticleDao.class.getName());
 
 	@Autowired
-	JDBCConnector connector;
+	JDBCConnector			connector;
 
-	private Connection jdbcConnection;
+	private Connection		jdbcConnection;
 
 	public List<Article> list()
 	{
@@ -37,8 +37,7 @@ public class ArticleDao
 		try
 		{
 			final String query = "select * from " + TABLE_NAME;
-			final ResultSet rs = jdbcConnection.createStatement().executeQuery(
-					query);
+			final ResultSet rs = jdbcConnection.createStatement().executeQuery(query);
 			while (rs.next())
 			{
 				final Article ar = createArticleFromResultSet(rs);
@@ -59,19 +58,20 @@ public class ArticleDao
 
 		try
 		{
-			final String query = "insert into " + TABLE_NAME
-					+ " (titre_article, contenu_article, "
-					+ "couv_article, description, id_auteur, id_categorie)"
-					+ " VALUES (?, ?, ?, ?, ?, ?)";
+			final String query = "insert into " + TABLE_NAME + " (titre_article, contenu_article, "
+					+ "couv_article, description, id_auteur, id_categorie, url, publication_date, sources)"
+					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-			final PreparedStatement statement = jdbcConnection
-					.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, ar.getTitle());
 			statement.setString(2, ar.getContent());
 			statement.setString(3, ar.getAritcleCover());
 			statement.setString(4, ar.getDescription());
 			statement.setLong(5, ar.getAuthorId());
 			statement.setLong(6, ar.getCategoryId());
+			statement.setString(7, ar.getUrl());
+			statement.setString(8, ar.getPublicationDate());
+			statement.setString(9, ar.getSources());
 			statement.executeUpdate();
 			ResultSet idresult = statement.getGeneratedKeys();
 			if (idresult.next() && idresult != null)
@@ -92,10 +92,8 @@ public class ArticleDao
 		Article article = null;
 		try
 		{
-			final String query = "select * from " + TABLE_NAME
-					+ " WHERE titre_article = ?";
-			PreparedStatement statement = jdbcConnection
-					.prepareStatement(query);
+			final String query = "select * from " + TABLE_NAME + " WHERE titre_article = ?";
+			PreparedStatement statement = jdbcConnection.prepareStatement(query);
 			statement.setString(1, title);
 			ResultSet rs = statement.executeQuery();
 			while (rs.next())
@@ -122,10 +120,43 @@ public class ArticleDao
 			ar.setTitle(rs.getString("titre_article"));
 			ar.setId(rs.getLong("id_article"));
 			ar.setDescription(rs.getString("description"));
+			ar.setPublicationDate(rs.getString("publication_date"));
+			ar.setUrl(rs.getString("url"));
+			ar.setSources(rs.getString("sources"));
 		} catch (SQLException e)
 		{
 			LOGGER.error(e.getMessage());
 		}
 		return ar;
+	}
+
+	public void update(Article ar)
+	{
+		jdbcConnection = connector.getConnection();
+
+		try
+		{
+			final String query = "update "
+					+ TABLE_NAME
+					+ " set titre_article = ?, contenu_article = ?, "
+					+ "couv_article = ?, description = ?, id_auteur = ?, id_categorie = ?, url = ?, publication_date = ?, sources = ?";
+
+			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			statement.setString(1, ar.getTitle());
+			statement.setString(2, ar.getContent());
+			statement.setString(3, ar.getAritcleCover());
+			statement.setString(4, ar.getDescription());
+			statement.setLong(5, ar.getAuthorId());
+			statement.setLong(6, ar.getCategoryId());
+			statement.setString(7, ar.getUrl());
+			statement.setString(8, ar.getPublicationDate());
+			statement.setString(9, ar.getSources());
+			statement.executeUpdate();
+			LOGGER.info("Updated Article " + ar.getTitle());
+			jdbcConnection.close();
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

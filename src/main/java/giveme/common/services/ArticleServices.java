@@ -94,7 +94,7 @@ public class ArticleServices
 	}
 
 	public List<Article> getArticleFromJob(String jobId) throws JsonParseException, JsonMappingException,
-	JsonProcessingException, IOException
+			JsonProcessingException, IOException
 	{
 		List<Article> articleList = new ArrayList<>();
 		List<Article> articleWithDetails = new ArrayList<>();
@@ -175,21 +175,41 @@ public class ArticleServices
 	{
 		for (Article articleWithoutDetails : articleList)
 		{
-			if (!articleExists(articleWithoutDetails.getTitle()))
+
+			for (Article detailedArticleWithoutcontent : articles)
 			{
-				for (Article detailedArticleWithoutcontent : articles)
+				if (articleWithoutDetails.getTitle().equals(detailedArticleWithoutcontent.getTitle()))
 				{
-					if (articleWithoutDetails.getTitle().equals(detailedArticleWithoutcontent.getTitle()))
-					{
-						detailedArticleWithoutcontent.fillMissingParams(articleWithoutDetails);
-						articleDao.save(detailedArticleWithoutcontent);
-					}
+					detailedArticleWithoutcontent.fillMissingParams(articleWithoutDetails);
+					saveOrUpdateIfExists(articleWithoutDetails, detailedArticleWithoutcontent);
 				}
 			}
 		}
 		return articles;
 	}
 
+	/**
+	 *
+	 * @param articleWithoutDetails
+	 * @param detailedArticleWithoutcontent
+	 */
+	private void saveOrUpdateIfExists(Article articleWithoutDetails, Article detailedArticleWithoutcontent)
+	{
+		if (!articleExists(articleWithoutDetails.getTitle()))
+		{
+			articleDao.save(detailedArticleWithoutcontent);
+		}
+		else
+		{
+			articleDao.update(detailedArticleWithoutcontent);
+		}
+	}
+
+	/**
+	 *
+	 * @param title
+	 * @return
+	 */
 	private boolean articleExists(String title)
 	{
 		Article art = articleDao.findByTitle(title);
@@ -208,7 +228,7 @@ public class ArticleServices
 	 */
 	private String extractItemType(JsonNode rootNode)
 	{
-		String itemType = rootNode.path("_type").toString().replaceAll("\"", "");
+		String itemType = rootNode.path("_type").getTextValue();
 		return itemType;
 	}
 
@@ -222,7 +242,7 @@ public class ArticleServices
 	 * @throws IOException
 	 */
 	private Article extractArticle(String jsonValue, ObjectMapper mapper) throws JsonParseException,
-	JsonMappingException, IOException
+			JsonMappingException, IOException
 	{
 		ArticleMapper articleMap = mapper.readValue(jsonValue, ArticleMapper.class);
 
@@ -304,7 +324,7 @@ public class ArticleServices
 	 * @throws JsonMappingException
 	 */
 	private ArrayList<Article> extractDetails(String jsonValue, ObjectMapper mapper) throws IOException,
-	JsonParseException, JsonMappingException
+			JsonParseException, JsonMappingException
 	{
 		ArticlesDetailsMapper articleDescription = mapper.readValue(jsonValue, ArticlesDetailsMapper.class);
 		Categorie category = buildCategory(articleDescription);
