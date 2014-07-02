@@ -94,7 +94,7 @@ public class ArticleServices
 	}
 
 	public List<Article> getArticleFromJob(String jobId) throws JsonParseException, JsonMappingException,
-			JsonProcessingException, IOException
+	JsonProcessingException, IOException
 	{
 		List<Article> articleList = new ArrayList<>();
 		List<Article> articleWithDetails = new ArrayList<>();
@@ -139,19 +139,16 @@ public class ArticleServices
 	 *
 	 * @param articleContent
 	 */
-	public String computeSrcUrls(Article article)
+	public String computeSrcUrls(String toModify, String elementAsString, String attribute, String url)
 	{
-		String url = article.getUrl();
-		String articleContent = article.getContent();
-
 		int lastSlash = url.lastIndexOf("/");
 		String contextPath = url.substring(0, lastSlash);
 
-		Document content = Jsoup.parse(articleContent);
-		Elements imgs = content.select("img");
+		Document content = Jsoup.parse(toModify);
+		Elements imgs = content.select(elementAsString);
 		for (Element element : imgs)
 		{
-			String imgUrl = element.attr("src");
+			String imgUrl = element.attr(attribute);
 			String separator = "";
 			if (imgUrl.indexOf("/") != 0)
 			{
@@ -159,7 +156,7 @@ public class ArticleServices
 			}
 			LOGGER.debug("Start element is : " + imgUrl + " is relative");
 			String computedImgUrl = contextPath + separator + imgUrl;
-			element.attr("src", computedImgUrl);
+			element.attr(attribute, computedImgUrl);
 			LOGGER.debug("Final element is : " + element.toString());
 
 		}
@@ -182,12 +179,19 @@ public class ArticleServices
 				if (articleWithoutDetails.getTitle().equals(detailedArticleWithoutcontent.getTitle()))
 				{
 					detailedArticleWithoutcontent.fillMissingParams(articleWithoutDetails);
-					detailedArticleWithoutcontent.setContent(computeSrcUrls(detailedArticleWithoutcontent));
+					resolveUrls(detailedArticleWithoutcontent);
 					saveOrUpdateIfExists(detailedArticleWithoutcontent);
 				}
 			}
 		}
 		return articles;
+	}
+
+	private void resolveUrls(Article article)
+	{
+		article.setContent(computeSrcUrls(article.getContent(), "img", "src", article.getUrl()));
+		article.setAritcleCover(computeSrcUrls(article.getAritcleCover(), "img", "src", article.getUrl()));
+		article.setSources(computeSrcUrls(article.getSources(), "a", "url", article.getUrl()));
 	}
 
 	/**
@@ -244,7 +248,7 @@ public class ArticleServices
 	 * @throws IOException
 	 */
 	private Article extractArticle(String jsonValue, ObjectMapper mapper) throws JsonParseException,
-			JsonMappingException, IOException
+	JsonMappingException, IOException
 	{
 		ArticleMapper articleMap = mapper.readValue(jsonValue, ArticleMapper.class);
 
@@ -326,7 +330,7 @@ public class ArticleServices
 	 * @throws JsonMappingException
 	 */
 	private ArrayList<Article> extractDetails(String jsonValue, ObjectMapper mapper) throws IOException,
-			JsonParseException, JsonMappingException
+	JsonParseException, JsonMappingException
 	{
 		ArticlesDetailsMapper articleDescription = mapper.readValue(jsonValue, ArticlesDetailsMapper.class);
 		Categorie category = buildCategory(articleDescription);
