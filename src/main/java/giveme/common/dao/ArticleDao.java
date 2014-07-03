@@ -26,6 +26,12 @@ public class ArticleDao
 	@Autowired
 	JDBCConnector			connector;
 
+	@Autowired
+	CategorieDao			categorieDao;
+
+	@Autowired
+	AuthorDao				authorDao;
+
 	private Connection		jdbcConnection;
 
 	public List<Article> list()
@@ -67,8 +73,8 @@ public class ArticleDao
 			statement.setString(2, ar.getContent());
 			statement.setString(3, ar.getAritcleCover());
 			statement.setString(4, ar.getDescription());
-			statement.setLong(5, ar.getAuthorId());
-			statement.setLong(6, ar.getCategoryId());
+			statement.setLong(5, ar.getAuthor().getAuthorId());
+			statement.setLong(6, ar.getCategorie().getCategoryId());
 			statement.setString(7, ar.getUrl());
 			statement.setString(8, ar.getPublicationDate());
 			statement.setString(9, ar.getSources());
@@ -78,7 +84,7 @@ public class ArticleDao
 			{
 				ar.setId(idresult.getLong("id_article"));
 			}
-			LOGGER.info("Saved Article " + ar.getTitle());
+			LOGGER.debug("Saved Article " + ar.getTitle());
 			jdbcConnection.close();
 		} catch (Exception e)
 		{
@@ -115,8 +121,8 @@ public class ArticleDao
 		{
 			ar = new Article();
 			ar.setContent(rs.getString("contenu_article"));
-			ar.setAuthorId(rs.getLong("id_auteur"));
-			ar.setCategoryId(rs.getLong("id_categorie"));
+			ar.setAuthor(authorDao.findById(rs.getLong("id_auteur")));
+			ar.setCategorie(categorieDao.findById(rs.getLong("id_categorie")));
 			ar.setTitle(rs.getString("titre_article"));
 			ar.setId(rs.getLong("id_article"));
 			ar.setDescription(rs.getString("description"));
@@ -146,13 +152,13 @@ public class ArticleDao
 			statement.setString(2, ar.getContent());
 			statement.setString(3, ar.getAritcleCover());
 			statement.setString(4, ar.getDescription());
-			statement.setLong(5, ar.getAuthorId());
-			statement.setLong(6, ar.getCategoryId());
+			statement.setLong(5, ar.getAuthor().getAuthorId());
+			statement.setLong(6, ar.getCategorie().getCategoryId());
 			statement.setString(7, ar.getUrl());
 			statement.setString(8, ar.getPublicationDate());
 			statement.setString(9, ar.getSources());
 			statement.executeUpdate();
-			LOGGER.info("Updated Article " + ar.getTitle());
+			LOGGER.debug("Updated Article " + ar.getTitle());
 			jdbcConnection.close();
 		} catch (Exception e)
 		{

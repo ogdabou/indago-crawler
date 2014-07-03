@@ -82,6 +82,27 @@ public class CategorieDao extends IDao<Categorie>
 		return cat;
 	}
 
+	public Categorie findById(Long categoryId)
+	{
+		connection = connector.getConnection();
+		Categorie cat = null;
+		try
+		{
+			final String query = "select * from " + TABLE_NAME + " WHERE id_categorie = ?";
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setLong(1, categoryId);
+			ResultSet rs = statement.executeQuery();
+			while (rs.next())
+			{
+				cat = createObjectFromResultSet(rs);
+			}
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return cat;
+	}
+
 	@Override
 	public Categorie createObjectFromResultSet(ResultSet rs) throws SQLException
 	{

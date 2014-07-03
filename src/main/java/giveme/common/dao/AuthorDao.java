@@ -26,9 +26,9 @@ public class AuthorDao extends IDao<Author>
 	}
 
 	@Autowired
-	JDBCConnector connector;
+	JDBCConnector		connector;
 
-	private Connection jdbcConnection;
+	private Connection	jdbcConnection;
 
 	@Override
 	public void save(Author toSave)
@@ -38,11 +38,9 @@ public class AuthorDao extends IDao<Author>
 
 		try
 		{
-			final String query = "insert into " + TABLE_NAME + " (nom_auteur) "
-					+ " VALUES (?);";
+			final String query = "insert into " + TABLE_NAME + " (nom_auteur) " + " VALUES (?);";
 
-			final PreparedStatement statement = jdbcConnection
-					.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
 			statement.setString(1, toSave.getAuthor());
 			statement.executeUpdate();
@@ -65,8 +63,7 @@ public class AuthorDao extends IDao<Author>
 		Author author = null;
 		try
 		{
-			final String query = "select * from " + TABLE_NAME
-					+ " WHERE nom_auteur = ?";
+			final String query = "select * from " + TABLE_NAME + " WHERE nom_auteur = ?";
 			PreparedStatement statement = connection.prepareStatement(query);
 			statement.setString(1, authorName);
 			ResultSet rs = statement.executeQuery();
@@ -96,5 +93,27 @@ public class AuthorDao extends IDao<Author>
 			LOGGER.error(e.getMessage());
 		}
 		return author;
+	}
+
+	public Author findById(long id)
+	{
+		connection = connector.getConnection();
+		Author author = null;
+		try
+		{
+			final String query = "select * from " + TABLE_NAME + " WHERE id_auteur = ?";
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setLong(1, id);
+			ResultSet rs = statement.executeQuery();
+			while (rs.next())
+			{
+				author = createObjectFromResultSet(rs);
+			}
+			return author;
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

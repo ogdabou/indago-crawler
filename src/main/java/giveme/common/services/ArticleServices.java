@@ -9,6 +9,7 @@ import giveme.common.beans.Spider;
 import giveme.common.dao.ArticleDao;
 import giveme.common.dao.AuthorDao;
 import giveme.common.dao.CategorieDao;
+import giveme.common.dao.JobsDao;
 import giveme.common.dao.SpiderDao;
 import giveme.common.models.ScrapingJob;
 import giveme.common.models.json.ArticleMapper;
@@ -42,7 +43,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ArticleServices
 {
-	public static Logger		LOGGER				= Logger.getLogger(ArticleServices.class.getName());
+	public static Logger		LOGGER	= Logger.getLogger(ArticleServices.class.getName());
 
 	@Autowired
 	private AuthorDao			authordao;
@@ -57,7 +58,13 @@ public class ArticleServices
 	private SpiderDao			spiderDao;
 
 	@Autowired
+	private JobsDao				scrapingJobDao;
+
+	@Autowired
 	private ScrapingJobServices	scrapingJobServices;
+
+	// @Autowired
+	// private PDFService pdfService;
 
 	@Value("${scrapingItemsApiUrl}")
 	private String				scrapingItemsApiUrl;
@@ -66,40 +73,68 @@ public class ArticleServices
 	private String				scrapingApiKey;
 
 	@Value("${scrapingProjectId}")
-	private final String		scrapingProjectId	= "4002";
+	private String				scrapingProjectId;
 
 	public ArticleServices()
 	{
 	}
 
+	/**
+	 *
+	 */
 	public void refreshAll()
 	{
 		List<Spider> spiderList = spiderDao.list();
+
 		LOGGER.info("Got " + spiderList.size() + " spiders to update.");
 		for (Spider spider : spiderList)
 		{
 			List<ScrapingJob> scrapingJobs = scrapingJobServices.getLatestFinishedJobs(spider.getSpider());
-			LOGGER.info("Got " + scrapingJobs.size() + " jobs to update.");
-			for (ScrapingJob job : scrapingJobs)
-			{
-				try
-				{
-					getArticleFromJob(job.getId());
-				} catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
+			LOGGER.info("Got " + scrapingJobs.size() + " jobs to update from spider " + spider.getSpider());
+			crawlJobs(spider, scrapingJobs);
 		}
 	}
 
+	/**
+	 *
+	 * @param spider
+	 * @param scrapingJobs
+	 */
+	private void crawlJobs(Spider spider, List<ScrapingJob> scrapingJobs)
+	{
+		for (ScrapingJob job : scrapingJobs)
+		{
+			// if (scrapingJobDao.findById(job.getId()) == null)
+			// {
+			LOGGER.info("Crawling job " + job.getId() + " from spider " + spider.getSpider());
+			try
+			{
+				getArticleFromJob(job.getId());
+				// scrapingJobDao.save(job);
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			// }
+		}
+	}
+
+	/**
+	 *
+	 * @param jobId
+	 * @return
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JsonProcessingException
+	 * @throws IOException
+	 */
 	public List<Article> getArticleFromJob(String jobId) throws JsonParseException, JsonMappingException,
-	JsonProcessingException, IOException
+			JsonProcessingException, IOException
 	{
 		List<Article> articleList = new ArrayList<Article>();
 		List<Article> articleWithDetails = new ArrayList<Article>();
 		String start = "0";
-		String end = "10";
+		String end = "30";
 		String query = scrapingItemsApiUrl + "/" + jobId + "?apikey=" + scrapingApiKey + "&start=" + jobId + "/"
 				+ start + "&count=" + end;
 		URL url = new URL(query);
@@ -109,7 +144,7 @@ public class ArticleServices
 
 		while ((jsonValue = in.readLine()) != null)
 		{
-			LOGGER.debug("received " + jsonValue);
+			LOGGER.info("received " + jsonValue);
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -130,6 +165,11 @@ public class ArticleServices
 		}
 
 		articleList = mergeDetailsAndContent(articleList, articleWithDetails);
+		LOGGER.info(articleList.size() + " articles builded");
+		for (Article finalArticle : articleWithDetails)
+		{
+			saveOrUpdateIfExists(finalArticle);
+		}
 		in.close();
 		return articleList;
 	}
@@ -149,49 +189,83 @@ public class ArticleServices
 		for (Element element : imgs)
 		{
 			String imgUrl = element.attr(attribute);
-			String separator = "";
-			if (imgUrl.indexOf("/") != 0)
+			if (!imgUrl.contains(contextPath))
 			{
-				separator = "/";
+				String separator = "";
+				if (imgUrl.indexOf("/") != 0)
+				{
+					separator = "/";
+				}
+				LOGGER.info("Start element is : " + imgUrl + " is relative");
+				String computedImgUrl = contextPath + separator + imgUrl;
+				element.attr(attribute, computedImgUrl);
+				LOGGER.info("Final element is : " + element.toString());
 			}
-			LOGGER.debug("Start element is : " + imgUrl + " is relative");
-			String computedImgUrl = contextPath + separator + imgUrl;
-			element.attr(attribute, computedImgUrl);
-			LOGGER.debug("Final element is : " + element.toString());
-
 		}
 		return content.toString();
 	}
 
 	/**
+	 * Presenters are articles retrieved on the LIST page of article, like the
 	 *
 	 * @param articleList
-	 * @param articles
+	 * @param articlePresenters
 	 * @return
 	 */
-	private List<Article> mergeDetailsAndContent(List<Article> articleList, List<Article> articles)
+	private List<Article> mergeDetailsAndContent(List<Article> articleList, List<Article> articlePresenters)
 	{
-		for (Article articleWithoutDetails : articleList)
+		List<Article> finalList = new ArrayList<Article>();
+		for (Article articleContent : articleList)
 		{
-
-			for (Article detailedArticleWithoutcontent : articles)
+			for (Article articleFromPresenter : articlePresenters)
 			{
-				if (articleWithoutDetails.getTitle().equals(detailedArticleWithoutcontent.getTitle()))
+				if (articleFromPresenter.getTitle() != null
+						&& articleFromPresenter.getTitle().equals(articleContent.getTitle()))
 				{
-					detailedArticleWithoutcontent.fillMissingParams(articleWithoutDetails);
-					resolveUrls(detailedArticleWithoutcontent);
-					saveOrUpdateIfExists(detailedArticleWithoutcontent);
+					setAuthorOrCreateWithCategory(articleContent, articleFromPresenter);
+					articleFromPresenter.fillMissingParams(articleContent);
+					resolveUrls(articleFromPresenter);
+					finalList.add(articleFromPresenter);
 				}
 			}
 		}
-		return articles;
+		return finalList;
+	}
+
+	/**
+	 *
+	 * @param articleContent
+	 * @param articleFromPresenter
+	 */
+	private void setAuthorOrCreateWithCategory(Article articleContent, Article articleFromPresenter)
+	{
+		if (articleContent.getAuthor() == null)
+		{
+			if (articleFromPresenter.getCategorie() != null)
+			{
+				Author aut = new Author();
+				aut.setAuthor(articleFromPresenter.getCategorie().getCategory());
+				// authordao.save(aut);
+				articleFromPresenter.setAuthor(aut);
+			}
+		}
 	}
 
 	private void resolveUrls(Article article)
 	{
-		article.setContent(computeSrcUrls(article.getContent(), "img", "src", article.getUrl()));
-		article.setAritcleCover(computeSrcUrls(article.getAritcleCover(), "img", "src", article.getUrl()));
-		article.setSources(computeSrcUrls(article.getSources(), "a", "url", article.getUrl()));
+		String url = article.getUrl();
+		if (article.getContent() != null)
+		{
+			article.setContent(computeSrcUrls(article.getContent(), "img", "src", url));
+		}
+		if (article.getAritcleCover() != null)
+		{
+			article.setAritcleCover(computeSrcUrls(article.getAritcleCover(), "img", "src", url));
+		}
+		if (article.getSources() != null)
+		{
+			article.setSources(computeSrcUrls(article.getSources(), "a", "url", url));
+		}
 	}
 
 	/**
@@ -203,12 +277,27 @@ public class ArticleServices
 	{
 		if (!articleExists(article.getTitle()))
 		{
+			LOGGER.info("saved " + article.getTitle());
+			if (!authorExists(article.getAuthor()))
+			{
+				authordao.save(article.getAuthor());
+			}
 			articleDao.save(article);
 		}
-		else
+	}
+
+	/**
+	 *
+	 * @param author
+	 * @return
+	 */
+	private boolean authorExists(Author author)
+	{
+		if (authordao.findByName(author.getAuthor()) != null)
 		{
-			articleDao.update(article);
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -248,36 +337,31 @@ public class ArticleServices
 	 * @throws IOException
 	 */
 	private Article extractArticle(String jsonValue, ObjectMapper mapper) throws JsonParseException,
-	JsonMappingException, IOException
+			JsonMappingException, IOException
 	{
 		ArticleMapper articleMap = mapper.readValue(jsonValue, ArticleMapper.class);
+		Article art = new Article();
 
 		Author author = buildAuthor(articleMap);
-
-		Article art = new Article();
-		art.setAuthorId(author.getAuthorId());
-
-		if (articleMap.getContent() != null)
+		if (author != null)
 		{
+			art.setAuthor(author);
+		}
+
+		if (articleMap.getContent() != null && articleMap.getPublication_date() != null
+				&& articleMap.getTitle() != null && articleMap.getUrl() != null)
+		{
+
 			art.setContent(articleMap.getContent().get(0));
-		}
-		if (articleMap.getPublication_date() != null)
-		{
 			art.setPublicationDate(articleMap.getPublication_date().get(0));
+			art.setTitle(articleMap.getTitle().get(0));
+			art.setUrl(articleMap.getUrl());
 		}
+
 		if (articleMap.getSources() != null)
 		{
 			art.setSources(articleMap.getSources().get(0));
 		}
-		if (articleMap.getTitle() != null)
-		{
-			art.setTitle(articleMap.getTitle().get(0));
-		}
-		if (articleMap.getUrl() != null)
-		{
-			art.setUrl(articleMap.getUrl());
-		}
-
 		return art;
 	}
 
@@ -295,10 +379,10 @@ public class ArticleServices
 			author = authordao.findByName(authorName);
 			if (author == null)
 			{
-				LOGGER.info("author " + author + " saved");
 				author = new Author();
 				author.setAuthor(authorName);
-				authordao.save(author);
+				LOGGER.info("author " + author.getAuthor() + " builded");
+				// authordao.save(author);
 			}
 			else
 			{
@@ -330,7 +414,7 @@ public class ArticleServices
 	 * @throws JsonMappingException
 	 */
 	private ArrayList<Article> extractDetails(String jsonValue, ObjectMapper mapper) throws IOException,
-	JsonParseException, JsonMappingException
+			JsonParseException, JsonMappingException
 	{
 		ArticlesDetailsMapper articleDescription = mapper.readValue(jsonValue, ArticlesDetailsMapper.class);
 		Categorie category = buildCategory(articleDescription);
@@ -356,7 +440,7 @@ public class ArticleServices
 		for (ArticlesDetailsJson detailsJson : articleDescription.getVariants())
 		{
 			Article article = new Article();
-			article.setCategoryId(category.getCategoryId());
+			article.setCategorie(category);
 
 			if (detailsJson.getArticle_url() != null)
 			{
@@ -411,9 +495,9 @@ public class ArticleServices
 			}
 			else
 			{
-
+				categorie = new Categorie();
+				categorie.setCategory(articleDescription.getCategory().get(0));
 			}
-
 			categoryDao.save(categorie);
 		}
 		return categorie;

@@ -5,15 +5,15 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class Article
 {
 
-	private Long id;
-	private String title;
-	private String content;
-	private String aritcleCover;
-	private String description;
-	private Long authorId;
-	private Long categoryId;
-	private String url;
-	private String sources;
+	private Long		id;
+	private String		title;
+	private String		content;
+	private String		aritcleCover;
+	private String		description;
+	private Author		author;
+	private String		url;
+	private String		sources;
+	private Categorie	categorie;
 
 	public String getSources()
 	{
@@ -26,7 +26,7 @@ public class Article
 	}
 
 	@JsonProperty(value = "publication_date")
-	public String publicationDate;
+	public String	publicationDate;
 
 	public String getUrl()
 	{
@@ -98,42 +98,59 @@ public class Article
 		this.description = description;
 	}
 
-	public Long getAuthorId()
+	public Author getAuthor()
 	{
-		return authorId;
+		return author;
 	}
 
-	public void setAuthorId(Long authorId)
+	public void setAuthor(Author author)
 	{
-		this.authorId = authorId;
+		this.author = author;
 	}
 
-	public Long getCategoryId()
+	public Categorie getCategorie()
 	{
-		return categoryId;
+		return categorie;
 	}
 
-	public void setCategoryId(Long category)
+	public void setCategorie(Categorie categorie)
 	{
-		categoryId = category;
+		this.categorie = categorie;
 	}
 
 	@Override
 	public String toString()
 	{
-		// TODO Auto-generated method stub
-		return "[ url=" + url + ", categoryId=" + categoryId + ", authorId="
-				+ authorId + ", " + " description=" + description
-				+ ", articleCover=" + aritcleCover + ", content=" + content;
+		return "[ url=" + url + ", category=" + categorie.getCategory() + ", author=" + author.getAuthor() + ", "
+				+ " description=" + description + ", articleCover=" + aritcleCover + ", content=" + content;
 	}
 
 	public void fillMissingParams(Article detailedArticle)
 	{
-		authorId = detailedArticle.getAuthorId();
-		content = detailedArticle.getContent();
-		sources = detailedArticle.getSources();
-		title = detailedArticle.getTitle();
-		url = detailedArticle.getUrl();
-		publicationDate = detailedArticle.getPublicationDate();
+		if (detailedArticle.getAuthor() != null)
+		{
+			author = detailedArticle.getAuthor();
+		}
+		if (detailedArticle.getContent() != null)
+		{
+			content = detailedArticle.getContent();
+		}
+		if (detailedArticle.getSources() != null)
+		{
+			sources = detailedArticle.getSources();
+		}
+		if (detailedArticle.getTitle() != null)
+		{
+			title = detailedArticle.getTitle();
+		}
+		if (detailedArticle.getUrl() != null)
+		{
+			url = detailedArticle.getUrl();
+		}
+		if (detailedArticle.getPublicationDate() != null)
+		{
+			publicationDate = detailedArticle.getPublicationDate();
+		}
+
 	}
 }
