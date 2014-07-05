@@ -68,6 +68,7 @@ public class JobsDao extends IDao<ScrapingJob>
 			{
 				job = createObjectFromResultSet(rs);
 			}
+			connection.close();
 		} catch (Exception e)
 		{
 			e.printStackTrace();

@@ -34,7 +34,7 @@ public class AuthorDao extends IDao<Author>
 	public void save(Author toSave)
 	{
 
-		jdbcConnection = connector.getConnection();
+		connection = connector.getConnection();
 
 		try
 		{
@@ -50,7 +50,7 @@ public class AuthorDao extends IDao<Author>
 				toSave.setAuthorId(rs.getLong("id_auteur"));
 			}
 			LOGGER.info("Saved author " + toSave.getAuthor());
-			jdbcConnection.close();
+			connection.close();
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -71,6 +71,7 @@ public class AuthorDao extends IDao<Author>
 			{
 				author = createObjectFromResultSet(rs);
 			}
+			connection.close();
 			return author;
 		} catch (Exception e)
 		{
@@ -109,6 +110,7 @@ public class AuthorDao extends IDao<Author>
 			{
 				author = createObjectFromResultSet(rs);
 			}
+			connection.close();
 			return author;
 		} catch (Exception e)
 		{

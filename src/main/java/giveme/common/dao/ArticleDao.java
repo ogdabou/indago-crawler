@@ -116,6 +116,7 @@ public class ArticleDao
 			{
 				article = createArticleFromResultSet(rs);
 			}
+			jdbcConnection.close();
 			return article;
 		} catch (Exception e)
 		{

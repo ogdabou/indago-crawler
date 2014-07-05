@@ -1,5 +1,7 @@
 package giveme.common.services;
 
+import static giveme.common.services.UrlServices.computeSrcUrlsInHtmlElement;
+import static giveme.common.services.UrlServices.computeUrlWithContextPath;
 import static giveme.shared.ItemType.ARTICLE;
 import static giveme.shared.ItemType.ARTICLE_DETAILS;
 import giveme.common.beans.Article;
@@ -30,10 +32,6 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -59,6 +57,9 @@ public class ArticleServices
 
 	@Autowired
 	private JobsDao				scrapingJobDao;
+
+	@Autowired
+	private UrlServices			urlService;
 
 	@Autowired
 	private ScrapingJobServices	scrapingJobServices;
@@ -128,8 +129,8 @@ public class ArticleServices
 	 * @throws JsonProcessingException
 	 * @throws IOException
 	 */
-	public List<Article> getArticleFromJob(String jobId) throws JsonParseException, JsonMappingException,
-			JsonProcessingException, IOException
+	private List<Article> getArticleFromJob(String jobId) throws JsonParseException, JsonMappingException,
+	JsonProcessingException, IOException
 	{
 		List<Article> articleList = new ArrayList<Article>();
 		List<Article> articleWithDetails = new ArrayList<Article>();
@@ -175,37 +176,6 @@ public class ArticleServices
 		}
 		in.close();
 		return articleList;
-	}
-
-	/**
-	 * Article content must be in HTML
-	 *
-	 * @param articleContent
-	 */
-	public String computeSrcUrls(String toModify, String elementAsString, String attribute, String url)
-	{
-		int lastSlash = url.lastIndexOf("/");
-		String contextPath = url.substring(0, lastSlash);
-
-		Document content = Jsoup.parse(toModify);
-		Elements imgs = content.select(elementAsString);
-		for (Element element : imgs)
-		{
-			String imgUrl = element.attr(attribute);
-			if (!imgUrl.contains(contextPath))
-			{
-				String separator = "";
-				if (imgUrl.indexOf("/") != 0)
-				{
-					separator = "/";
-				}
-				LOGGER.debug("Start element is : " + imgUrl + " is relative");
-				String computedImgUrl = contextPath + separator + imgUrl;
-				element.attr(attribute, computedImgUrl);
-				LOGGER.debug("Final element is : " + element.toString());
-			}
-		}
-		return content.toString();
 	}
 
 	/**
@@ -258,15 +228,15 @@ public class ArticleServices
 		String url = article.getUrl();
 		if (article.getContent() != null)
 		{
-			article.setContent(computeSrcUrls(article.getContent(), "img", "src", url));
+			article.setContent(computeSrcUrlsInHtmlElement(article.getContent(), "img", "src", url));
 		}
 		if (article.getAritcleCover() != null)
 		{
-			article.setAritcleCover(computeSrcUrls(article.getAritcleCover(), "img", "src", url));
+			article.setAritcleCover(computeUrlWithContextPath(article.getAritcleCover(), url));
 		}
 		if (article.getSources() != null)
 		{
-			article.setSources(computeSrcUrls(article.getSources(), "a", "url", url));
+			article.setSources(computeSrcUrlsInHtmlElement(article.getSources(), "a", "url", url));
 		}
 	}
 
@@ -339,7 +309,7 @@ public class ArticleServices
 	 * @throws IOException
 	 */
 	private Article extractArticle(String jsonValue, ObjectMapper mapper) throws JsonParseException,
-			JsonMappingException, IOException
+	JsonMappingException, IOException
 	{
 		ArticleMapper articleMap = mapper.readValue(jsonValue, ArticleMapper.class);
 		Article art = null;
@@ -393,17 +363,6 @@ public class ArticleServices
 
 	/**
 	 *
-	 * @return
-	 */
-	public Article convert()
-	{
-		Article cv = new Article();
-
-		return cv;
-	}
-
-	/**
-	 *
 	 * @param jsonValue
 	 * @param mapper
 	 * @return
@@ -412,7 +371,7 @@ public class ArticleServices
 	 * @throws JsonMappingException
 	 */
 	private ArrayList<Article> extractDetails(String jsonValue, ObjectMapper mapper) throws IOException,
-			JsonParseException, JsonMappingException
+	JsonParseException, JsonMappingException
 	{
 		ArticlesDetailsMapper articleDescription = mapper.readValue(jsonValue, ArticlesDetailsMapper.class);
 		Categorie category = buildCategory(articleDescription);
@@ -432,7 +391,7 @@ public class ArticleServices
 	 * @param category
 	 * @return
 	 */
-	public ArrayList<Article> fillArticlesWithDetails(ArticlesDetailsMapper articleDescription, Categorie category)
+	private ArrayList<Article> fillArticlesWithDetails(ArticlesDetailsMapper articleDescription, Categorie category)
 	{
 		ArrayList<Article> articleList = new ArrayList<Article>();
 		for (ArticlesDetailsJson detailsJson : articleDescription.getVariants())

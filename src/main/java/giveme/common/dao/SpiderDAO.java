@@ -75,6 +75,7 @@ public class SpiderDao extends IDao<Spider>
 			{
 				spider = createObjectFromResultSet(rs);
 			}
+			connection.close();
 			return spider;
 		} catch (Exception e)
 		{

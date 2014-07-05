@@ -34,7 +34,7 @@ public class CategorieDao extends IDao<Categorie>
 	public void save(Categorie toSave)
 	{
 
-		jdbcConnection = connector.getConnection();
+		connection = connector.getConnection();
 
 		try
 		{
@@ -49,7 +49,7 @@ public class CategorieDao extends IDao<Categorie>
 			{
 				toSave.setCategoryId(rs.getLong("id_categorie"));
 			}
-			jdbcConnection.close();
+			connection.close();
 			LOGGER.info("Saved category " + toSave.getCategory());
 		} catch (Exception e)
 		{
@@ -71,6 +71,7 @@ public class CategorieDao extends IDao<Categorie>
 			{
 				cat = createObjectFromResultSet(rs);
 			}
+			connection.close();
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -92,6 +93,7 @@ public class CategorieDao extends IDao<Categorie>
 			{
 				cat = createObjectFromResultSet(rs);
 			}
+			connection.close();
 		} catch (Exception e)
 		{
 			e.printStackTrace();
