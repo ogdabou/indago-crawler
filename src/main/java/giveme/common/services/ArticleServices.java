@@ -96,8 +96,8 @@ public class ArticleServices
 	public List<Article> getArticleFromJob(String jobId) throws JsonParseException, JsonMappingException,
 	JsonProcessingException, IOException
 	{
-		List<Article> articleList = new ArrayList<>();
-		List<Article> articleWithDetails = new ArrayList<>();
+		List<Article> articleList = new ArrayList<Article>();
+		List<Article> articleWithDetails = new ArrayList<Article>();
 		String start = "0";
 		String end = "10";
 		String query = scrapingItemsApiUrl + "/" + jobId + "?apikey=" + scrapingApiKey + "&start=" + jobId + "/"
@@ -352,7 +352,7 @@ public class ArticleServices
 	 */
 	public ArrayList<Article> fillArticlesWithDetails(ArticlesDetailsMapper articleDescription, Categorie category)
 	{
-		ArrayList<Article> articleList = new ArrayList<>();
+		ArrayList<Article> articleList = new ArrayList<Article>();
 		for (ArticlesDetailsJson detailsJson : articleDescription.getVariants())
 		{
 			Article article = new Article();

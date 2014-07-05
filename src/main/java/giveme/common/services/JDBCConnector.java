@@ -44,12 +44,11 @@ public class JDBCConnector
 		try
 		{
 
-			connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPw);
+			connection = DriverManager.getConnection(jdbcUrl);
 
 		} catch (SQLException e)
 		{
-
-			LOGGER.info("Connection Failed! Check output console");
+			LOGGER.info("Connection Failed! for this database " + jdbcPw + jdbcUrl + jdbcUser);
 			e.printStackTrace();
 		}
 		if (connection != null)

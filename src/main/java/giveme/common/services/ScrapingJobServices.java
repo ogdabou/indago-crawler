@@ -43,7 +43,7 @@ public class ScrapingJobServices
 
 	public List<ScrapingJob> getLatestFinishedJobs(String spiderName)
 	{
-		List<ScrapingJob> jobs = new ArrayList<>();
+		List<ScrapingJob> jobs = new ArrayList<ScrapingJob>();
 
 		String query = "https://dash.scrapinghub.com/api/jobs/list.json?project=" + scrapingProjectId + "&apikey="
 				+ scrapingApiKey + "&spider=" + spiderName + "&state=" + "finished" + "&count="

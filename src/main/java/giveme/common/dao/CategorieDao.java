@@ -21,7 +21,7 @@ public class CategorieDao extends IDao<Categorie>
 
 	public CategorieDao()
 	{
-		TABLE_NAME = "\"Categorie\"";
+		TABLE_NAME = "\"categorie\"";
 		LOGGER = Logger.getLogger(CategorieDao.class.getName());
 	}
 
@@ -41,8 +41,12 @@ public class CategorieDao extends IDao<Categorie>
 			final String query = "insert into " + TABLE_NAME + " (libelle_categorie) " + " VALUES (?);";
 
 			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-
-			statement.setString(1, toSave.getCategory());
+			
+			if(toSave != null)
+				statement.setString(1, toSave.getCategory());
+			else
+				statement.setString(1, "non classe");
+			
 			statement.executeUpdate();
 			final ResultSet rs = statement.getGeneratedKeys();
 			if (rs.next() && rs != null)

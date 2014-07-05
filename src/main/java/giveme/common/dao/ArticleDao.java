@@ -32,7 +32,7 @@ public class ArticleDao
 	{
 		jdbcConnection = connector.getConnection();
 
-		final List<Article> articleList = new ArrayList<>();
+		final List<Article> articleList = new ArrayList<Article>();
 
 		try
 		{

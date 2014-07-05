@@ -21,7 +21,7 @@ public class AuthorDao extends IDao<Author>
 
 	public AuthorDao()
 	{
-		TABLE_NAME = "\"Auteur\"";
+		TABLE_NAME = "\"auteur\"";
 		LOGGER = Logger.getLogger(AuthorDao.class.getName());
 	}
 
