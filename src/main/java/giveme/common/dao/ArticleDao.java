@@ -8,7 +8,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -20,19 +23,21 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ArticleDao
 {
-	private final String	TABLE_NAME	= "articles";
-	public static Logger	LOGGER		= Logger.getLogger(ArticleDao.class.getName());
+	private final String			TABLE_NAME			= "articles";
+	public static Logger			LOGGER				= Logger.getLogger(ArticleDao.class.getName());
 
 	@Autowired
-	JDBCConnector			connector;
+	JDBCConnector					connector;
 
 	@Autowired
-	CategorieDao			categorieDao;
+	CategorieDao					categorieDao;
 
 	@Autowired
-	AuthorDao				authorDao;
+	AuthorDao						authorDao;
 
-	private Connection		jdbcConnection;
+	private Connection				jdbcConnection;
+
+	private final SimpleDateFormat	creationDateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:dd");
 
 	public List<Article> list()
 	{
@@ -64,9 +69,11 @@ public class ArticleDao
 
 		try
 		{
-			final String query = "insert into " + TABLE_NAME + " (titre_article, contenu_article, "
-					+ "couv_article, description, id_auteur, id_categorie, url, publication_date, sources)"
-					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			final String query = "insert into "
+					+ TABLE_NAME
+					+ " (titre_article, contenu_article, "
+					+ "couv_article, description, id_auteur, id_categorie, url, publication_date, sources, creation_date)"
+					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, ar.getTitle());
@@ -78,6 +85,9 @@ public class ArticleDao
 			statement.setString(7, ar.getUrl());
 			statement.setString(8, ar.getPublicationDate());
 			statement.setString(9, ar.getSources());
+			Timestamp creationTimeStamp = new Timestamp(creationDateFormat.parse(creationDateFormat.format(new Date()))
+					.getTime());
+			statement.setTimestamp(10, creationTimeStamp);
 			statement.executeUpdate();
 			ResultSet idresult = statement.getGeneratedKeys();
 			if (idresult.next() && idresult != null)
