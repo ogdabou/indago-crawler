@@ -144,7 +144,7 @@ public class ArticleServices
 
 		while ((jsonValue = in.readLine()) != null)
 		{
-			LOGGER.info("received " + jsonValue);
+			LOGGER.debug("received " + jsonValue);
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -155,18 +155,21 @@ public class ArticleServices
 			if (ARTICLE_DETAILS.getType().equals(itemType))
 			{
 				articleWithDetails = extractDetails(jsonValue, mapper);
-
 			}
 			else if (ARTICLE.getType().equals(itemType))
 			{
 				Article article = extractArticle(jsonValue, mapper);
-				articleList.add(article);
+				if (article != null)
+				{
+					articleList.add(article);
+				}
 			}
 		}
 
 		articleList = mergeDetailsAndContent(articleList, articleWithDetails);
+
 		LOGGER.info(articleList.size() + " articles builded");
-		for (Article finalArticle : articleWithDetails)
+		for (Article finalArticle : articleList)
 		{
 			saveOrUpdateIfExists(finalArticle);
 		}
@@ -196,10 +199,10 @@ public class ArticleServices
 				{
 					separator = "/";
 				}
-				LOGGER.info("Start element is : " + imgUrl + " is relative");
+				LOGGER.debug("Start element is : " + imgUrl + " is relative");
 				String computedImgUrl = contextPath + separator + imgUrl;
 				element.attr(attribute, computedImgUrl);
-				LOGGER.info("Final element is : " + element.toString());
+				LOGGER.debug("Final element is : " + element.toString());
 			}
 		}
 		return content.toString();
@@ -245,7 +248,6 @@ public class ArticleServices
 			{
 				Author aut = new Author();
 				aut.setAuthor(articleFromPresenter.getCategorie().getCategory());
-				// authordao.save(aut);
 				articleFromPresenter.setAuthor(aut);
 			}
 		}
@@ -312,7 +314,7 @@ public class ArticleServices
 		{
 			return false;
 		}
-		LOGGER.info("Article " + title + " exists");
+		LOGGER.debug("Article " + title + " exists");
 		return true;
 	}
 
@@ -340,28 +342,29 @@ public class ArticleServices
 			JsonMappingException, IOException
 	{
 		ArticleMapper articleMap = mapper.readValue(jsonValue, ArticleMapper.class);
-		Article art = new Article();
+		Article art = null;
 
 		Author author = buildAuthor(articleMap);
 		if (author != null)
 		{
+			art = new Article();
 			art.setAuthor(author);
+			if (articleMap.getContent() != null && articleMap.getPublication_date() != null
+					&& articleMap.getTitle() != null && articleMap.getUrl() != null)
+			{
+
+				art.setContent(articleMap.getContent().get(0));
+				art.setPublicationDate(articleMap.getPublication_date().get(0));
+				art.setTitle(articleMap.getTitle().get(0));
+				art.setUrl(articleMap.getUrl());
+			}
+
+			if (articleMap.getSources() != null)
+			{
+				art.setSources(articleMap.getSources().get(0));
+			}
 		}
 
-		if (articleMap.getContent() != null && articleMap.getPublication_date() != null
-				&& articleMap.getTitle() != null && articleMap.getUrl() != null)
-		{
-
-			art.setContent(articleMap.getContent().get(0));
-			art.setPublicationDate(articleMap.getPublication_date().get(0));
-			art.setTitle(articleMap.getTitle().get(0));
-			art.setUrl(articleMap.getUrl());
-		}
-
-		if (articleMap.getSources() != null)
-		{
-			art.setSources(articleMap.getSources().get(0));
-		}
 		return art;
 	}
 
@@ -373,7 +376,7 @@ public class ArticleServices
 	private Author buildAuthor(ArticleMapper articleMap)
 	{
 		Author author = null;
-		if (articleMap.getAuthor() != null)
+		if (articleMap.getAuthor() != null && articleMap.getAuthor().get(0) != null)
 		{
 			String authorName = articleMap.getAuthor().get(0);
 			author = authordao.findByName(authorName);
@@ -381,12 +384,7 @@ public class ArticleServices
 			{
 				author = new Author();
 				author.setAuthor(authorName);
-				LOGGER.info("author " + author.getAuthor() + " builded");
-				// authordao.save(author);
-			}
-			else
-			{
-				LOGGER.info("Author " + author.getAuthor() + " already exist");
+				LOGGER.debug("author " + author.getAuthor() + " builded");
 			}
 			return author;
 		}
@@ -490,7 +488,7 @@ public class ArticleServices
 			categorie = categoryDao.findByName(articleDescription.getCategory().get(0));
 			if (categorie != null)
 			{
-				LOGGER.info("Categorie " + categorie.getCategory() + " already exists.");
+				LOGGER.debug("Categorie " + categorie.getCategory() + " already exists.");
 				return categorie;
 			}
 			else

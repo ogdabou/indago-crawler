@@ -41,12 +41,8 @@ public class CategorieDao extends IDao<Categorie>
 			final String query = "insert into " + TABLE_NAME + " (libelle_categorie) " + " VALUES (?);";
 
 			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-			
-			if(toSave != null)
-				statement.setString(1, toSave.getCategory());
-			else
-				statement.setString(1, "non classe");
-			
+			statement.setString(1, toSave.getCategory());
+
 			statement.executeUpdate();
 			final ResultSet rs = statement.getGeneratedKeys();
 			if (rs.next() && rs != null)

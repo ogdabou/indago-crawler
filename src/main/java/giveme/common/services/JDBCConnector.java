@@ -44,7 +44,7 @@ public class JDBCConnector
 		try
 		{
 
-			connection = DriverManager.getConnection(jdbcUrl);
+			connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPw);
 
 		} catch (SQLException e)
 		{
