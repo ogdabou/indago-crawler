@@ -84,4 +84,10 @@ public class SpiderDao extends IDao<Spider>
 		return spider;
 	}
 
+	@Override
+	public JDBCConnector getJDBCConnector()
+	{
+		return connector;
+	}
+
 }

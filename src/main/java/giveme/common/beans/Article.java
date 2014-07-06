@@ -15,6 +15,23 @@ public class Article
 	private String		sources;
 	private Categorie	categorie;
 
+	public Article()
+	{
+		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * Used by tests
+	 *
+	 * @param url
+	 * @param title
+	 */
+	public Article(String title, String url)
+	{
+		this.title = title;
+		this.url = url;
+	}
+
 	public String getSources()
 	{
 		return sources;

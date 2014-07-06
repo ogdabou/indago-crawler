@@ -9,27 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class IDao<T>
 {
-	protected String TABLE_NAME;
-	protected Connection connection;
-	public static Logger LOGGER;
-
-	@Autowired
-	JDBCConnector jdbcConnector;
+	protected String		TABLE_NAME;
+	protected Connection	connection;
+	public static Logger	LOGGER;
 
 	public List<T> list()
 	{
-		this.connection = this.jdbcConnector.getConnection();
+		this.connection = getJDBCConnector().getConnection();
 
 		final List<T> resultList = new ArrayList<T>();
 		try
 		{
 			final String query = "select * from " + this.TABLE_NAME;
-			final ResultSet rs = this.connection.createStatement()
-					.executeQuery(query);
+			final ResultSet rs = this.connection.createStatement().executeQuery(query);
 			while (rs.next())
 			{
 				final T resultObject = createObjectFromResultSet(rs);
@@ -46,6 +41,7 @@ public abstract class IDao<T>
 
 	public abstract void save(T toSave);
 
-	public abstract T createObjectFromResultSet(ResultSet rs)
-			throws SQLException;
+	public abstract T createObjectFromResultSet(ResultSet rs) throws SQLException;
+
+	public abstract JDBCConnector getJDBCConnector();
 }

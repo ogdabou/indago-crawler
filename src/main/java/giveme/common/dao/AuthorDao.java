@@ -118,4 +118,10 @@ public class AuthorDao extends IDao<Author>
 		}
 		return null;
 	}
+
+	@Override
+	public JDBCConnector getJDBCConnector()
+	{
+		return connector;
+	}
 }

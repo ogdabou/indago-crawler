@@ -64,6 +64,9 @@ public class ArticleServices
 	@Autowired
 	private ScrapingJobServices	scrapingJobServices;
 
+	@Autowired
+	private HTMLGenerator		htmlGenerator;
+
 	// @Autowired
 	// private PDFService pdfService;
 
@@ -80,13 +83,17 @@ public class ArticleServices
 	{
 	}
 
+	public void buildIndex()
+	{
+		articleDao.list();
+	}
+
 	/**
 	 *
 	 */
 	public void refreshAll()
 	{
 		List<Spider> spiderList = spiderDao.list();
-
 		LOGGER.info("Got " + spiderList.size() + " spiders to update.");
 		for (Spider spider : spiderList)
 		{

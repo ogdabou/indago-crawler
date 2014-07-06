@@ -3,16 +3,13 @@ package giveme.common.dao;
 import giveme.common.beans.Article;
 import giveme.common.services.JDBCConnector;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +18,8 @@ import org.springframework.stereotype.Repository;
 
 @Component
 @Repository
-public class ArticleDao
+public class ArticleDao extends IDao<Article>
 {
-	private final String			TABLE_NAME			= "articles";
-	public static Logger			LOGGER				= Logger.getLogger(ArticleDao.class.getName());
-
 	@Autowired
 	JDBCConnector					connector;
 
@@ -35,37 +29,18 @@ public class ArticleDao
 	@Autowired
 	AuthorDao						authorDao;
 
-	private Connection				jdbcConnection;
-
 	private final SimpleDateFormat	creationDateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:dd");
 
-	public List<Article> list()
+	public ArticleDao()
 	{
-		jdbcConnection = connector.getConnection();
-
-		final List<Article> articleList = new ArrayList<Article>();
-
-		try
-		{
-			final String query = "select * from " + TABLE_NAME;
-			final ResultSet rs = jdbcConnection.createStatement().executeQuery(query);
-			while (rs.next())
-			{
-				final Article ar = createArticleFromResultSet(rs);
-				articleList.add(ar);
-			}
-			jdbcConnection.close();
-		} catch (Exception e)
-		{
-			LOGGER.error(e.getMessage());
-		}
-
-		return articleList;
+		TABLE_NAME = "articles";
+		LOGGER = Logger.getLogger(ArticleDao.class.getName());
 	}
 
+	@Override
 	public void save(Article ar)
 	{
-		jdbcConnection = connector.getConnection();
+		connection = connector.getConnection();
 
 		try
 		{
@@ -75,7 +50,7 @@ public class ArticleDao
 					+ "couv_article, description, id_auteur, id_categorie, url, publication_date, sources, creation_date)"
 					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			final PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, ar.getTitle());
 			statement.setString(2, ar.getContent());
 			statement.setString(3, ar.getAritcleCover());
@@ -95,7 +70,7 @@ public class ArticleDao
 				ar.setId(idresult.getLong("id_article"));
 			}
 			LOGGER.debug("Saved Article " + ar.getTitle());
-			jdbcConnection.close();
+			connection.close();
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -104,19 +79,19 @@ public class ArticleDao
 
 	public Article findByTitle(String title)
 	{
-		jdbcConnection = connector.getConnection();
+		connection = connector.getConnection();
 		Article article = null;
 		try
 		{
 			final String query = "select * from " + TABLE_NAME + " WHERE titre_article = ?";
-			PreparedStatement statement = jdbcConnection.prepareStatement(query);
+			PreparedStatement statement = connection.prepareStatement(query);
 			statement.setString(1, title);
 			ResultSet rs = statement.executeQuery();
 			while (rs.next())
 			{
-				article = createArticleFromResultSet(rs);
+				article = createObjectFromResultSet(rs);
 			}
-			jdbcConnection.close();
+			connection.close();
 			return article;
 		} catch (Exception e)
 		{
@@ -125,7 +100,8 @@ public class ArticleDao
 		return null;
 	}
 
-	private Article createArticleFromResultSet(ResultSet rs)
+	@Override
+	public Article createObjectFromResultSet(ResultSet rs)
 	{
 		Article ar = null;
 		try
@@ -149,7 +125,7 @@ public class ArticleDao
 
 	public void update(Article ar)
 	{
-		jdbcConnection = connector.getConnection();
+		connection = connector.getConnection();
 
 		try
 		{
@@ -158,7 +134,7 @@ public class ArticleDao
 					+ " set titre_article = ?, contenu_article = ?, "
 					+ "couv_article = ?, description = ?, id_auteur = ?, id_categorie = ?, url = ?, publication_date = ?, sources = ?";
 
-			final PreparedStatement statement = jdbcConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			final PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, ar.getTitle());
 			statement.setString(2, ar.getContent());
 			statement.setString(3, ar.getAritcleCover());
@@ -170,10 +146,16 @@ public class ArticleDao
 			statement.setString(9, ar.getSources());
 			statement.executeUpdate();
 			LOGGER.debug("Updated Article " + ar.getTitle());
-			jdbcConnection.close();
+			connection.close();
 		} catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public JDBCConnector getJDBCConnector()
+	{
+		return connector;
 	}
 }

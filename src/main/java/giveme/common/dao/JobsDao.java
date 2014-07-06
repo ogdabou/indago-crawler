@@ -86,4 +86,10 @@ public class JobsDao extends IDao<ScrapingJob>
 		sj.setStarted_time(rs.getTimestamp("started_time"));
 		return sj;
 	}
+
+	@Override
+	public JDBCConnector getJDBCConnector()
+	{
+		return connector;
+	}
 }

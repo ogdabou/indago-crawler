@@ -116,4 +116,10 @@ public class CategorieDao extends IDao<Categorie>
 		}
 		return cat;
 	}
+
+	@Override
+	public JDBCConnector getJDBCConnector()
+	{
+		return connector;
+	}
 }
