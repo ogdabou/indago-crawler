@@ -8,6 +8,7 @@ import giveme.common.services.ArticleServices;
 import giveme.common.services.HTMLGenerator;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -43,7 +44,7 @@ public class ItemController
 	private ArticleServices	articleServices;
 
 	@Autowired
-	HTMLGenerator			generator;
+	HTMLGenerator			htmlGenerator;
 
 	/**
 	 *
@@ -64,7 +65,7 @@ public class ItemController
 		try
 		{
 			List<Article> articleList = articleDao.list();
-			String newIndex = generator.updateIndex(articleList);
+			String newIndex = htmlGenerator.updateIndex(articleList);
 			InputStream responseStream = new ByteArrayInputStream(newIndex.getBytes());
 
 			String fileName = URLEncoder.encode("index.html", "UTF-8");
@@ -84,18 +85,20 @@ public class ItemController
 	{
 		try
 		{
-			List<Article> articleList = articleDao.list();
-			String indexFile = generator.updateIndex(articleList);
-
-			Map<Long, String> articleFiles = generator.generateArticleFiles(articleList);
-
 			ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(response.getOutputStream());
 			zipOutput.setLevel(ZipArchiveOutputStream.STORED);
 
-			addFileToZipOutputStream(zipOutput, "index.html", indexFile);
+			List<Article> articleList = articleDao.list();
+			String indexFile = htmlGenerator.updateIndex(articleList);
+
+			htmlGenerator.generateImageFiles(articleList, zipOutput);
+			Map<Long, String> articleFiles = htmlGenerator.generateArticleFiles(articleList);
+
+			writeBytesToZipOutputStream(zipOutput, "index.html", indexFile.getBytes());
 			for (Long articleId : articleFiles.keySet())
 			{
-				addFileToZipOutputStream(zipOutput, articleId + ".html", articleFiles.get(articleId));
+				writeBytesToZipOutputStream(zipOutput, "articles/" + articleId + ".html", articleFiles.get(articleId)
+						.getBytes());
 			}
 			response.flushBuffer();
 			zipOutput.close();
@@ -105,13 +108,33 @@ public class ItemController
 		}
 	}
 
-	private void addFileToZipOutputStream(ZipArchiveOutputStream zipOutput, String fileName, String indexFile)
+	private void writeFileToZipOutputStream(ZipArchiveOutputStream zipOutput, File imgFile)
+	{
+		ZipArchiveEntry zipEntry = new ZipArchiveEntry(imgFile, imgFile.getName());
+		try
+		{
+			zipOutput.putArchiveEntry(zipEntry);
+			zipOutput.closeArchiveEntry();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Write bytes to archive
+	 *
+	 * @param zipOutput
+	 * @param fileName
+	 * @param bs
+	 */
+	private void writeBytesToZipOutputStream(ZipArchiveOutputStream zipOutput, String fileName, byte[] bs)
 	{
 		ZipArchiveEntry zipEntry = new ZipArchiveEntry(fileName);
 		try
 		{
 			zipOutput.putArchiveEntry(zipEntry);
-			zipOutput.write(indexFile.getBytes());
+			zipOutput.write(bs);
 			zipOutput.closeArchiveEntry();
 		} catch (IOException e)
 		{
